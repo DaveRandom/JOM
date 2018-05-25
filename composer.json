@@ -1,0 +1,19 @@
+{
+  "name": "daverandom/jom",
+  "description": "A DOM-like API for working for JSON",
+  "minimum-stability": "stable",
+  "license": "mit",
+  "authors": [
+    {
+      "name": "Chris Wright",
+      "email": "foss.jom@daverandom.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "DaveRandom\\Jom\\": "src/" }
+  },
+  "require": {
+    "php": ">=7.2",
+    "daverandom/exceptional-json": "^1.0"
+  }
+}
