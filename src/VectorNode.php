@@ -226,11 +226,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
     }
 
-    public function toArray(): array
-    {
-        return (array)$this->getValue();
-    }
-
+    abstract public function toArray(): array;
     abstract public function offsetGet($index): Node;
     abstract public function offsetSet($index, $value): void;
 }

@@ -78,4 +78,17 @@ final class ObjectNode extends VectorNode
 
         return $result;
     }
+
+    public function toArray(): array
+    {
+        $result = [];
+
+        foreach ($this as $value) {
+            $result[] = $value instanceof VectorNode
+                ? $value->toArray()
+                : $value->getValue();
+        }
+
+        return $result;
+    }
 }
