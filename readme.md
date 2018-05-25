@@ -218,6 +218,14 @@ abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
     public function insert(Node $node, ?Node $beforeNode): void;
 
     /**
+     * Replace the old $nodeOrKey with the supplied node.
+     *
+     * @throws InvalidSubjectNodeException when $nodeOrKey is not a member of the array.
+     * @throws InvalidOperationException when the arguments do not describe a valid replacement operation.
+     */
+    public function replace(Node|int $nodeOrKey, Node $newNode): void
+
+    /**
      * Remove the supplied node from the array.
      *
      * @throws InvalidOperationException if the supplied node is not a member of the array.

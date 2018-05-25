@@ -4,6 +4,7 @@ namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidKeyException;
 use DaveRandom\Jom\Exceptions\InvalidOperationException;
+use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
 final class ArrayNode extends VectorNode
 {
@@ -75,6 +76,26 @@ final class ArrayNode extends VectorNode
             $beforeNode->key++;
             $beforeNode = $beforeNode->nextSibling;
         }
+    }
+
+    /**
+     * @param Node|int $nodeOrKey
+     * @throws InvalidSubjectNodeException
+     * @throws InvalidOperationException
+     */
+    public function replace($nodeOrKey, Node $newNode): void
+    {
+        if (!($nodeOrKey instanceof Node)) {
+            if (!isset($this->keyMap[$nodeOrKey])) {
+                throw new InvalidSubjectNodeException(
+                    "Old node must be a valid array index or an instance of " . Node::class
+                );
+            }
+
+            $nodeOrKey = $this->keyMap[$nodeOrKey];
+        }
+
+        $this->replaceNode($nodeOrKey, $newNode);
     }
 
     /**
