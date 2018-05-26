@@ -4,16 +4,38 @@ namespace DaveRandom\Jom;
 
 final class NodeListIterator implements \Iterator
 {
+    public const INACTIVE = 0;
+    public const ACTIVE = 1;
+
     private $firstNode;
-    private $activityNotifier;
+    private $activityStateChangeNotifier;
+    private $activityState = self::INACTIVE;
 
     /** @var Node */
     private $currentNode;
 
-    public function __construct(Node $firstNode, callable $activityNotifier = null)
+    public function __construct(Node $firstNode, callable $activityStateChangeNotifier = null)
     {
         $this->firstNode = $firstNode;
-        $this->activityNotifier = $activityNotifier;
+        $this->activityStateChangeNotifier = $activityStateChangeNotifier;
+    }
+
+    private function notifyActivityStateChange(int $newState): void
+    {
+        if ($this->activityState === $newState) {
+            return;
+        }
+
+        $this->activityState = $newState;
+
+        if ($this->activityStateChangeNotifier !== null) {
+            ($this->activityStateChangeNotifier)($this->activityState);
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->notifyActivityStateChange(self::INACTIVE);
     }
 
     public function current(): ?Node
@@ -33,18 +55,14 @@ final class NodeListIterator implements \Iterator
 
     public function valid(): bool
     {
-        if ($this->currentNode === null && $this->activityNotifier !== null) {
-            ($this->activityNotifier)(false);
-        }
+        $this->notifyActivityStateChange(self::INACTIVE);
 
         return $this->currentNode !== null;
     }
 
     public function rewind(): void
     {
-        if ($this->activityNotifier !== null) {
-            ($this->activityNotifier)(true);
-        }
+        $this->notifyActivityStateChange(self::ACTIVE);
 
         $this->currentNode = $this->firstNode;
     }

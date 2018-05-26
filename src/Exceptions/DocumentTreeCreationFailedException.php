@@ -2,4 +2,4 @@
 
 namespace DaveRandom\Jom\Exceptions;
 
-final class PointerEvaluationFailureException extends Exception { }
+final class DocumentTreeCreationFailedException extends Exception { }

@@ -79,7 +79,7 @@ abstract class Node implements \JsonSerializable
         return new Pointer($path, \count($basePath), false);
     }
 
-    public function __construct(Document $ownerDocument)
+    public function __construct(?Document $ownerDocument = null)
     {
         $this->ownerDocument = $ownerDocument;
     }
@@ -114,7 +114,7 @@ abstract class Node implements \JsonSerializable
         return null;
     }
 
-    final public function getOwnerDocument(): Document
+    final public function getOwnerDocument(): ?Document
     {
         return $this->ownerDocument;
     }
@@ -131,7 +131,7 @@ abstract class Node implements \JsonSerializable
      * @throws InvalidPointerException
      * @throws InvalidSubjectNodeException
      */
-    public function getPointer(Node $base = null): Pointer
+    final public function getPointer(Node $base = null): Pointer
     {
         return $base === null
             ? $this->getAbsolutePointer()

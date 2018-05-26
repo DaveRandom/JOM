@@ -13,16 +13,29 @@ final class \DaveRandom\Jom\Document
     implements \JsonSerializable
 {
     /**
+     * Create an empty document.
+     */
+    public __construct();
+
+    /**
      * Create a Document instance from a JSON string, forwarding arguments to json_encode().
      *
-     * @throws ParseFailureException when the document creation fails.
+     * @throws ParseFailureException when the supplied string cannot be parsed as JSON.
+     * @throws DocumentTreeCreationFailedException when a document tree cannot be built from the parsed data.
      */
-    public static function parse(string $json, int $depthLimit = 512, int $options = 0): Document;
+    public static Document parse(string $json, int $depthLimit = 512, int $options = 0);
+
+    /**
+     * Create a Document instance from a PHP value.
+     *
+     * @throws DocumentTreeCreationFailedException when a document tree cannot be built from the supplied data.
+     */
+    public static Document createFromData($data);
 
     /**
      * Returns the root node of the document, or NULL if the document is empty.
      */
-    public function getRootNode(): ?Node;
+    public ?Node getRootNode();
 
     /**
      * Evaluate a JSON pointer against the document tree.
@@ -31,7 +44,7 @@ final class \DaveRandom\Jom\Document
      * @throws PointerEvaluationFailureException when the pointer does not indiciate a valid location in the document
      * @throws InvalidSubjectNodeException when the $base node is not part of the document
      */
-    public function evaluatePointer(Pointer|string $pointer, Node $base = null): Node|int|string;
+    public Node|int|string evaluatePointer(Pointer|string $pointer, Node $base = null);
 }
 ```
 
@@ -40,40 +53,45 @@ abstract class \DaveRandom\Jom\Node
     implements \JsonSerializable
 {
     /**
+     * Default Node constructor
+     */
+    public __construct(?Document $ownerDocument = null);
+
+    /**
      * Returns the parent node of this node, or NULL if this is the root node or the node is not present in the owning
      * document.
      */
-    public function getParent(): ?Node;
+    public ?Node getParent();
 
     /**
      * Returns the next sibling node of this node, or NULL if the node does not have a following sibling node.
      */
-    public function getPreviousSibling(): ?Node;
+    public ?Node getPreviousSibling();
 
     /**
      * Returns the previous sibling node of this node, or NULL if the node does not have a preceding sibling node.
      */
-    public function getNextSibling(): ?Node;
+    public ?Node getNextSibling();
 
     /**
      * Returns TRUE if this node has child nodes, otherwise FALSE.
      */
-    public function hasChildren(): bool;
+    public bool hasChildren();
 
     /**
      * Returns the first child node of this node, or NULL if the node does not have any child nodes.
      */
-    public function getFirstChild(): ?Node;
+    public ?Node getFirstChild();
 
     /**
      * Returns the last child node of this node, or NULL if the node does not have any child nodes.
      */
-    public function getLastChild(): ?Node;
+    public ?Node getLastChild();
 
     /**
      * Returns the Document object that owns this node.
      */
-    public function getOwnerDocument(): Document;
+    public ?Document getOwnerDocument();
 
     /**
      * Get a JSON pointer for this node's position in the document. If the $base node is supplied, get a relative
@@ -81,18 +99,25 @@ abstract class \DaveRandom\Jom\Node
      *
      * @throws InvalidSubjectNodeException when the $base node is invalid
      */
-    public function getPointer(Node $base = null): Pointer;
+    public Pointer getPointer(Node $base = null);
 
     /**
      * Returns the key of this node within its parent node, or NULL if this is the root node of the document.
      */
-    public function getKey(): string|int|null;
+    public string|int|null getKey();
 
     /**
      * Returns the data represented by this node as the appropriate PHP type.
      */
-    public function getValue(): mixed;
+    public mixed getValue();
 }
+```
+
+```php
+/**
+ * Represents a NULL value node.
+ */
+final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node { }
 ```
 
 ```php
@@ -101,22 +126,12 @@ final class \DaveRandom\Jom\BooleanNode extends \DaveRandom\Jom\Node
     /**
      * Create a new boolean value node owned by the supplied document.
      */
-    public function __construct(Document $ownerDocument, bool $value = false);
+    public __construct(?Document $ownerDocument = null, bool $value = false);
 
     /**
      * Set the value of this node
      */
-    public function setValue(bool $value): void;
-}
-```
-
-```php
-final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node
-{
-    /**
-     * Create a new NULL value node owned by the supplied document.
-     */
-    public function __construct(Document $ownerDocument);
+    public void setValue(bool $value);
 }
 ```
 
@@ -126,12 +141,12 @@ final class \DaveRandom\Jom\NumberNode extends \DaveRandom\Jom\Node
     /**
      * Create a new number value node owned by the supplied document.
      */
-    public function __construct(Document $ownerDocument);
+    public __construct(?Document $ownerDocument = null, int|float $value = 0);
 
     /**
      * Set the value of this node
      */
-    public function setValue(int|float $value): void;
+    public void setValue(int|float $value);
 }
 ```
 
@@ -141,27 +156,12 @@ final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
     /**
      * Create a new string value node owned by the supplied document.
      */
-    public function __construct(Document $ownerDocument);
+    public __construct(?Document $ownerDocument = null, string $value = "");
 
     /**
      * Set the value of this node
      */
-    public function setValue(string $value): void;
-}
-```
-
-```php
-final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
-{
-    /**
-     * Create a new string value node owned by the supplied document.
-     */
-    public function __construct(Document $ownerDocument);
-
-    /**
-     * Set the value of this node
-     */
-    public function setValue(string $value): void;
+    public void setValue(string $value);
 }
 ```
 
@@ -172,7 +172,7 @@ abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node
     /**
      * Returns the data represented by this node as an array.
      */
-    public function toArray(): array;
+    public array toArray();
 }
 ```
 
@@ -182,55 +182,56 @@ abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
     /**
      * Append a node to the array.
      *
-     * @throws InvalidSubjectNodeException when the new node is not owned by the same document.
-     * @throws InvalidOperationException when there is an active iterator for the array.
+     * @throws InvalidSubjectNodeException when $node is invalid.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function push(Node $node): void;
+    public void push(Node $node);
 
     /**
      * Remove the last node from the array, if any, and return it.
      *
-     * @throws InvalidOperationException when there is an active iterator for the array.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function pop(): ?Node;
+    public ?Node pop();
 
     /**
      * Prepend a node to the array.
      *
-     * @throws InvalidSubjectNodeException when the new node is not owned by the same document.
-     * @throws InvalidOperationException when there is an active iterator for the array.
+     * @throws InvalidSubjectNodeException when $node is invalid.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function unshift(Node $node): void;
+    public void unshift(Node $node);
 
     /**
      * Remove the first node from the array, if any, and return it.
      *
-     * @throws InvalidOperationException when there is an active iterator for the array.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function shift(): ?Node;
+    public ?Node shift();
 
     /**
      * Insert a new node before the supplied reference node. If the reference node is NULL it is equivalent to push().
      *
-     * @throws InvalidOperationException when there is an active iterator for the array.
-     * @throws InvalidSubjectNodeException when the operation described by the arguments is invalid.
+     * @throws InvalidSubjectNodeException when $beforeNode is not a member of the array, or $node is invalid.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function insert(Node $node, ?Node $beforeNode): void;
+    public void insert(Node $node, ?Node $beforeNode);
 
     /**
      * Replace the old $nodeOrKey with the supplied node.
      *
-     * @throws InvalidSubjectNodeException when $nodeOrKey is not a member of the array.
-     * @throws InvalidOperationException when the arguments do not describe a valid replacement operation.
+     * @throws InvalidSubjectNodeException when $nodeOrKey is not a member of the array, or $newNode is invalid.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function replace(Node|int $nodeOrKey, Node $newNode): void
+    public void replace(Node|int $nodeOrKey, Node $newNode);
 
     /**
      * Remove the supplied node from the array.
      *
-     * @throws InvalidOperationException if the supplied node is not a member of the array.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
+     * @throws InvalidSubjectNodeException when $node is not a member of the array.
      */
-    public function remove(Node $node): void;
+    public void remove(Node $node);
 }
 ```
 
@@ -239,31 +240,32 @@ abstract class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
 {
     /**
      * Returns TRUE if the object has a property with the supplied name, otherwise FALSE.
-     *
-     * @throws InvalidKeyException when the property does not exist.
      */
-    public function hasProperty(string $name): bool;
+    public bool hasProperty(string $name);
 
     /**
      * Get the value node associated with the supplied property name.
      *
      * @throws InvalidKeyException when the property does not exist.
      */
-    public function getProperty(string $name): Node;
+    public Node getProperty(string $name);
 
     /**
      * Set the value node associated with the supplied property name.
      *
-     * @throws InvalidSubjectNodeException when the operation described by the arguments is invalid.
+     * @throws InvalidSubjectNodeException when $value is invalid.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function setProperty(string $name, Node $value): void;
+    public void setProperty(string $name, Node $value);
 
     /**
-     * Remove the value node associated with the supplied property name.
+     * Remove the supplied property.
      *
-     * @throws InvalidKeyException when the property does not exist.
+     * @throws InvalidSubjectNodeException when $nodeOrName is a Node that is not a property of the object.
+     * @throws InvalidKeyException when $nodeOrName is the name of a property that does not exist.
+     * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public function removeProperty(string $name): void;
+    public void removeProperty(Node|string $nodeOrName);
 }
 ```
 
@@ -274,10 +276,12 @@ Exception Hierarchy
 ```
 \Exception
   ┗ \DaveRandom\Jom\Exceptions\Exception
+      ┣ \DaveRandom\Jom\Exceptions\DocumentTreeCreationFailedException
       ┣ \DaveRandom\Jom\Exceptions\InvalidNodeValueException
       ┣ \DaveRandom\Jom\Exceptions\InvalidOperationException
       ┃   ┣ \DaveRandom\Jom\Exceptions\InvalidKeyException
-      ┃   ┗ \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+      ┃   ┣ \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+      ┃   ┗ \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
       ┣ \DaveRandom\Jom\Exceptions\InvalidPointerException
       ┣ \DaveRandom\Jom\Exceptions\ParseFailureException
       ┗ \DaveRandom\Jom\Exceptions\PointerEvaluationFailureException

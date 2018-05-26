@@ -2,8 +2,9 @@
 
 namespace DaveRandom\Jom;
 
-use DaveRandom\Jom\Exceptions\InvalidOperationException;
+use DaveRandom\Jom\Exceptions\InvalidKeyException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
+use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 
 abstract class VectorNode extends Node implements \Countable, \IteratorAggregate, \ArrayAccess
 {
@@ -19,12 +20,29 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     protected $activeIteratorCount = 0;
 
     /**
-     * @throws InvalidOperationException
+     * @throws InvalidKeyException
+     */
+    protected function resolveNode($nodeOrKey): Node
+    {
+        if ($nodeOrKey instanceof Node) {
+            return $nodeOrKey;
+        }
+
+        if (isset($this->keyMap[$nodeOrKey])) {
+            return $this->keyMap[$nodeOrKey];
+        }
+
+        throw new InvalidKeyException("{$nodeOrKey} does not reference a valid child node");
+    }
+
+    /**
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     protected function appendNode(Node $node, $key): Node
     {
         if ($this->activeIteratorCount !== 0) {
-            throw new InvalidOperationException('Cannot modify a vector with an active iterator');
+            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
         }
 
         if ($node->ownerDocument !== $this->ownerDocument) {
@@ -54,7 +72,8 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     protected function insertNode(Node $node, $key, Node $beforeNode = null): Node
     {
@@ -63,7 +82,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
 
         if ($this->activeIteratorCount !== 0) {
-            throw new InvalidOperationException('Cannot modify a vector with an active iterator');
+            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
         }
 
         if ($node->ownerDocument !== $this->ownerDocument) {
@@ -93,12 +112,13 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     protected function replaceNode(Node $newNode, Node $oldNode): Node
     {
         if ($this->activeIteratorCount !== 0) {
-            throw new InvalidOperationException('Cannot modify a vector with an active iterator');
+            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
         }
 
         if ($newNode->ownerDocument !== $this->ownerDocument) {
@@ -137,12 +157,13 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     protected function removeNode(Node $node): Node
     {
         if ($this->activeIteratorCount !== 0) {
-            throw new InvalidOperationException('Cannot modify a vector with an active iterator');
+            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
         }
 
         if ($node->parent !== $this) {
@@ -193,9 +214,9 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     final public function getIterator(): NodeListIterator
     {
         return new NodeListIterator($this->firstChild, function($state) {
-            $this->activeIteratorCount += $state
-                ? 1
-                : -1;
+            $this->activeIteratorCount += $state === NodeListIterator::INACTIVE
+                ? -1
+                : 1;
 
             \assert($this->activeIteratorCount >= 0, new \Error('Vector node active iterator count is negative'));
         });
@@ -217,7 +238,8 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     public function offsetUnset($index): void
     {

@@ -9,7 +9,7 @@ final class NumberNode extends Node
     /**
      * @param int|float $value
      */
-    public function __construct(Document $ownerDocument, $value)
+    public function __construct(?Document $ownerDocument = null, $value = 0)
     {
         parent::__construct($ownerDocument);
 

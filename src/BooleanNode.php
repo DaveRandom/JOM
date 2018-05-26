@@ -6,7 +6,7 @@ final class BooleanNode extends Node
 {
     private $value;
 
-    public function __construct(Document $ownerDocument, bool $value = false)
+    public function __construct(?Document $ownerDocument = null, bool $value = false)
     {
         parent::__construct($ownerDocument);
 

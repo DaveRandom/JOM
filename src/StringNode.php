@@ -6,7 +6,7 @@ final class StringNode extends Node
 {
     private $value;
 
-    public function __construct(Document $ownerDocument, string $value = '')
+    public function __construct(?Document $ownerDocument = null, string $value = '')
     {
         parent::__construct($ownerDocument);
 

@@ -3,13 +3,14 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidKeyException;
-use DaveRandom\Jom\Exceptions\InvalidOperationException;
+use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
 final class ArrayNode extends VectorNode
 {
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     public function push(Node $node): void
     {
@@ -17,7 +18,7 @@ final class ArrayNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
      */
     public function pop(): ?Node
     {
@@ -27,13 +28,18 @@ final class ArrayNode extends VectorNode
             return null;
         }
 
-        $this->remove($node);
+        try {
+            $this->remove($node);
+        } catch (InvalidSubjectNodeException $e) {
+            \assert(false, new \Error("Unexpected InvalidSubjectNodeException", 0, $e));
+        }
 
         return $node;
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     public function unshift(Node $node): void
     {
@@ -41,7 +47,7 @@ final class ArrayNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
      */
     public function shift(): ?Node
     {
@@ -51,13 +57,18 @@ final class ArrayNode extends VectorNode
             return null;
         }
 
-        $this->remove($node);
+        try {
+            $this->remove($node);
+        } catch (InvalidSubjectNodeException $e) {
+            \assert(false, new \Error("Unexpected InvalidSubjectNodeException", 0, $e));
+        }
 
         return $node;
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     public function insert(Node $node, ?Node $beforeNode): void
     {
@@ -79,27 +90,19 @@ final class ArrayNode extends VectorNode
     }
 
     /**
-     * @param Node|int $nodeOrKey
+     * @param Node|int $nodeOrIndex
+     * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
-     * @throws InvalidOperationException
+     * @throws InvalidKeyException
      */
-    public function replace($nodeOrKey, Node $newNode): void
+    public function replace($nodeOrIndex, Node $newNode): void
     {
-        if (!($nodeOrKey instanceof Node)) {
-            if (!isset($this->keyMap[$nodeOrKey])) {
-                throw new InvalidSubjectNodeException(
-                    "Old node must be a valid array index or an instance of " . Node::class
-                );
-            }
-
-            $nodeOrKey = $this->keyMap[$nodeOrKey];
-        }
-
-        $this->replaceNode($nodeOrKey, $newNode);
+        $this->replaceNode($this->resolveNode($nodeOrIndex), $newNode);
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
      */
     public function remove(Node $node): void
     {
@@ -126,7 +129,9 @@ final class ArrayNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidSubjectNodeException
+     * @throws InvalidKeyException
      */
     public function offsetSet($index, $value): void
     {

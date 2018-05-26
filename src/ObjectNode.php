@@ -3,7 +3,8 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidKeyException;
-use DaveRandom\Jom\Exceptions\InvalidOperationException;
+use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
+use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 
 final class ObjectNode extends VectorNode
 {
@@ -25,7 +26,8 @@ final class ObjectNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
      */
     public function setProperty(string $name, Node $value): void
     {
@@ -37,15 +39,14 @@ final class ObjectNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @param Node|string $nodeOrName
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
+     * @throws InvalidKeyException
      */
-    public function removeProperty(string $name): void
+    public function removeProperty($nodeOrName): void
     {
-        if (!isset($this->keyMap[$name])) {
-            throw new InvalidKeyException("Property '{$name}' does not exist on the object");
-        }
-
-        $this->removeNode($this->keyMap[$name]);
+        $this->removeNode($this->resolveNode($nodeOrName));
     }
 
     /**
@@ -57,7 +58,8 @@ final class ObjectNode extends VectorNode
     }
 
     /**
-     * @throws InvalidOperationException
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
      */
     public function offsetSet($propertyName, $value): void
     {

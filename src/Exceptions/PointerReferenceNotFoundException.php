@@ -2,4 +2,4 @@
 
 namespace DaveRandom\Jom\Exceptions;
 
-abstract class InvalidOperationException extends Exception { }
+final class PointerReferenceNotFoundException extends Exception { }
