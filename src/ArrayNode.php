@@ -8,6 +8,23 @@ use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
 final class ArrayNode extends VectorNode
 {
+    private function incrementKeys(?Node $current): void
+    {
+        while ($current !== null) {
+            $this->keyMap[++$current->key] = $current;
+            $current = $current->nextSibling;
+        }
+    }
+
+    private function decrementKeys(?Node $current): void
+    {
+        while ($current !== null) {
+            unset($this->keyMap[$current->key]);
+            $this->keyMap[--$current->key] = $current;
+            $current = $current->nextSibling;
+        }
+    }
+
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
@@ -83,10 +100,7 @@ final class ArrayNode extends VectorNode
 
         $this->insertNode($node, $key, $beforeNode);
 
-        while ($beforeNode !== null) {
-            $beforeNode->key++;
-            $beforeNode = $beforeNode->nextSibling;
-        }
+        $this->incrementKeys($beforeNode);
     }
 
     /**
@@ -110,10 +124,7 @@ final class ArrayNode extends VectorNode
 
         $this->removeNode($node);
 
-        while ($next !== null) {
-            $next->key--;
-            $next = $next->nextSibling;
-        }
+        $this->decrementKeys($next);
     }
 
     /**
