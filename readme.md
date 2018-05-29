@@ -1,12 +1,18 @@
-JOM - JSON Object Model
-===
+# JOM - JSON Object Model
 
 A DOM-like API for working with JSON data, including an [RFC 6901 JSON pointer](https://tools.ietf.org/html/rfc6901)
 implementation with the [draft relative JSON pointer](https://tools.ietf.org/html/draft-luff-relative-json-pointer-00)
 extension.
 
-API
----
+## Status
+
+[![Build Status](https://travis-ci.org/DaveRandom/JOM.svg?branch=master)](https://travis-ci.org/DaveRandom/JOM)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DaveRandom/JOM/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DaveRandom/JOM/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/DaveRandom/JOM/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/DaveRandom/JOM/?branch=master)
+
+## API
+
+### [Document](https://github.com/DaveRandom/JOM/blob/master/src/Document.php)
 
 ```php
 final class \DaveRandom\Jom\Document
@@ -47,6 +53,8 @@ final class \DaveRandom\Jom\Document
     public Node|int|string evaluatePointer(Pointer|string $pointer, Node $base = null);
 }
 ```
+
+### [Node](https://github.com/DaveRandom/JOM/blob/master/src/Node.php)
 
 ```php
 abstract class \DaveRandom\Jom\Node
@@ -113,12 +121,16 @@ abstract class \DaveRandom\Jom\Node
 }
 ```
 
+### [NullNode](https://github.com/DaveRandom/JOM/blob/master/src/NullNode.php)
+
 ```php
 /**
  * Represents a NULL value node.
  */
 final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node { }
 ```
+
+### [BooleanNode](https://github.com/DaveRandom/JOM/blob/master/src/BooleanNode.php)
 
 ```php
 final class \DaveRandom\Jom\BooleanNode extends \DaveRandom\Jom\Node
@@ -135,6 +147,8 @@ final class \DaveRandom\Jom\BooleanNode extends \DaveRandom\Jom\Node
 }
 ```
 
+### [NumberNode](https://github.com/DaveRandom/JOM/blob/master/src/NumberNode.php)
+
 ```php
 final class \DaveRandom\Jom\NumberNode extends \DaveRandom\Jom\Node
 {
@@ -149,6 +163,8 @@ final class \DaveRandom\Jom\NumberNode extends \DaveRandom\Jom\Node
     public void setValue(int|float $value);
 }
 ```
+
+### [StringNode](https://github.com/DaveRandom/JOM/blob/master/src/StringNode.php)
 
 ```php
 final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
@@ -165,6 +181,8 @@ final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
 }
 ```
 
+### [VectorNode](https://github.com/DaveRandom/JOM/blob/master/src/VectorNode.php)
+
 ```php
 abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node 
     implements \Countable, \IteratorAggregate, \ArrayAccess
@@ -175,6 +193,8 @@ abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node
     public array toArray();
 }
 ```
+
+### [ArrayNode](https://github.com/DaveRandom/JOM/blob/master/src/ArrayNode.php)
 
 ```php
 abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
@@ -235,6 +255,8 @@ abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
 }
 ```
 
+### [ObjectNode](https://github.com/DaveRandom/JOM/blob/master/src/ObjectNode.php)
+
 ```php
 abstract class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
 {
@@ -269,20 +291,18 @@ abstract class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
 }
 ```
 
-
-Exception Hierarchy
----
+### Exception Hierarchy
 
 ```
 \Exception
-  ┗ \DaveRandom\Jom\Exceptions\Exception
-      ┣ \DaveRandom\Jom\Exceptions\DocumentTreeCreationFailedException
-      ┣ \DaveRandom\Jom\Exceptions\InvalidNodeValueException
-      ┣ \DaveRandom\Jom\Exceptions\InvalidOperationException
-      ┃   ┣ \DaveRandom\Jom\Exceptions\InvalidKeyException
-      ┃   ┣ \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
-      ┃   ┗ \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
-      ┣ \DaveRandom\Jom\Exceptions\InvalidPointerException
-      ┣ \DaveRandom\Jom\Exceptions\ParseFailureException
-      ┗ \DaveRandom\Jom\Exceptions\PointerEvaluationFailureException
+  └ \DaveRandom\Jom\Exceptions\Exception Ⓐ
+      ├ \DaveRandom\Jom\Exceptions\DocumentTreeCreationFailedException Ⓕ
+      ├ \DaveRandom\Jom\Exceptions\InvalidNodeValueException Ⓕ
+      ├ \DaveRandom\Jom\Exceptions\InvalidOperationException Ⓐ
+      │   ├ \DaveRandom\Jom\Exceptions\InvalidKeyException Ⓕ
+      │   ├ \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException Ⓕ
+      │   └ \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException Ⓕ
+      ├ \DaveRandom\Jom\Exceptions\InvalidPointerException Ⓕ
+      ├ \DaveRandom\Jom\Exceptions\ParseFailureException Ⓕ
+      └ \DaveRandom\Jom\Exceptions\PointerEvaluationFailureException Ⓕ
 ```
