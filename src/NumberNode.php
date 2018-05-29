@@ -29,7 +29,7 @@ final class NumberNode extends Node
      */
     public function setValue($value): void
     {
-        if (!\is_int($value) && !\is_float($value)) {
+        if (!(\is_int($value) || \is_float($value))) {
             throw new \TypeError('Number node value must be an integer or a double');
         }
 
