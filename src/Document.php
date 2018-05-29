@@ -248,6 +248,38 @@ final class Document implements \JsonSerializable
     }
 
     /**
+     * @throws InvalidNodeValueException
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
+     */
+    private function importVectorNode(VectorNode $node): VectorNode
+    {
+        if (!($node instanceof ArrayNode || $node instanceof ObjectNode)) {
+            throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
+        }
+
+        $newNode = new $node($this);
+
+        foreach ($node as $key => $value) {
+            $newNode[$key] = $this->import($value);
+        }
+
+        return $newNode;
+    }
+
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    private function importScalarNode(Node $node): Node
+    {
+        if (!($node instanceof BooleanNode || $node instanceof NumberNode || $node instanceof StringNode)) {
+            throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
+        }
+
+        return new $node($this, $node->getValue());
+    }
+
+    /**
      * @throws DocumentTreeCreationFailedException
      * @throws ParseFailureException
      */
@@ -307,21 +339,9 @@ final class Document implements \JsonSerializable
             return new NullNode($this);
         }
 
-        if ($node instanceof BooleanNode || $node instanceof NumberNode || $node instanceof StringNode) {
-            return new $node($this, $node->getValue());
-        }
-
-        if (!($node instanceof ArrayNode || $node instanceof ObjectNode)) {
-            throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
-        }
-
-        $newNode = new $node($this);
-
-        foreach ($node as $key => $value) {
-            $newNode[$key] = $this->import($value);
-        }
-
-        return $newNode;
+        return $node instanceof VectorNode
+            ? $this->importVectorNode($node)
+            : $this->importScalarNode($node);
     }
 
     /**
