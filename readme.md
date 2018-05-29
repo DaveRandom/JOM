@@ -124,9 +124,6 @@ abstract class \DaveRandom\Jom\Node
 ### [NullNode](https://github.com/DaveRandom/JOM/blob/master/src/NullNode.php)
 
 ```php
-/**
- * Represents a NULL value node.
- */
 final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node { }
 ```
 
@@ -197,7 +194,7 @@ abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node
 ### [ArrayNode](https://github.com/DaveRandom/JOM/blob/master/src/ArrayNode.php)
 
 ```php
-abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
+final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
 {
     /**
      * Append a node to the array.
@@ -258,7 +255,7 @@ abstract class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
 ### [ObjectNode](https://github.com/DaveRandom/JOM/blob/master/src/ObjectNode.php)
 
 ```php
-abstract class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
+final class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
 {
     /**
      * Returns TRUE if the object has a property with the supplied name, otherwise FALSE.
