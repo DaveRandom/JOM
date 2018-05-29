@@ -47,7 +47,7 @@ final class \DaveRandom\Jom\Document
      * Evaluate a JSON pointer against the document tree.
      *
      * @throws InvalidPointerException when the supplied pointer string is invalid
-     * @throws PointerEvaluationFailureException when the pointer does not indiciate a valid location in the document
+     * @throws PointerEvaluationFailureException when the pointer does not indicate an existing node
      * @throws InvalidSubjectNodeException when the $base node is not part of the document
      */
     public Node|int|string evaluatePointer(Pointer|string $pointer, Node $base = null);
@@ -66,8 +66,8 @@ abstract class \DaveRandom\Jom\Node
     public __construct(?Document $ownerDocument = null);
 
     /**
-     * Returns the parent node of this node, or NULL if this is the root node or the node is not present in the owning
-     * document.
+     * Returns the parent node of this node, or NULL if this is the root node or the node is not present in the
+     * owning document.
      */
     public ?Node getParent();
 
@@ -227,7 +227,7 @@ final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
     public ?Node shift();
 
     /**
-     * Insert a new node before the supplied reference node. If the reference node is NULL it is equivalent to push().
+     * Insert a new node before the supplied reference node. If $beforeNode is NULL it is equivalent to push().
      *
      * @throws InvalidSubjectNodeException when $beforeNode is not a member of the array, or $node is invalid.
      * @throws WriteOperationForbiddenException when there is an active iterator for the array.
