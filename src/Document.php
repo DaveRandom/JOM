@@ -16,190 +16,16 @@ final class Document implements \JsonSerializable
     /** @var Node */
     private $rootNode;
 
-    private const SCALAR_VALUE_NODE_CLASSES = [
-        'boolean' => BooleanNode::class,
-        'integer' => NumberNode::class,
-        'double' => NumberNode::class,
-        'string' => StringNode::class,
-    ];
-
-    private static function createScalarOrNullNodeFromValue(Document $doc, $value): ?Node
+    private static function getSafeNodeFactory(): SafeNodeFactory
     {
-        if ($value === null) {
-            return new NullNode($doc);
-        }
-
-        $className = self::SCALAR_VALUE_NODE_CLASSES[\gettype($value)] ?? null;
-
-        if ($className !== null) {
-            return new $className($doc, $value);
-        }
-
-        return null;
+        static $factory;
+        return $factory ?? $factory = new SafeNodeFactory();
     }
 
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createArrayNodeFromSafePackedArray(Document $doc, array $values): ArrayNode
+    private static function getUnsafeNodeFactory(): UnsafeNodeFactory
     {
-        $node = new ArrayNode($doc);
-
-        foreach ($values as $value) {
-            $node->push(self::createNodeFromSafeValue($doc, $value));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createArrayNodeFromUnsafePackedArray(Document $doc, array $values): ArrayNode
-    {
-        $node = new ArrayNode($doc);
-
-        foreach ($values as $value) {
-            $node->push(self::createNodeFromUnsafeValue($doc, $value));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createObjectNodeFromSafeStdClass(Document $doc, \stdClass $values): ObjectNode
-    {
-        $node = new ObjectNode($doc);
-
-        foreach ($values as $key => $value) {
-            $node->setProperty($key, self::createNodeFromSafeValue($doc, $value));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createObjectNodeFromUnsafeStdClass(Document $doc, \stdClass $values): ObjectNode
-    {
-        $node = new ObjectNode($doc);
-
-        foreach ($values as $key => $value) {
-            $node->setProperty($key, self::createNodeFromUnsafeValue($doc, $value));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createObjectNodeFromUnsafePropertyArray(Document $doc, array $properties): ObjectNode
-    {
-        $node = new ObjectNode($doc);
-
-        foreach ($properties as $name => $value) {
-            $node->setProperty($name, self::createNodeFromUnsafeValue($doc, $value));
-        }
-
-        return $node;
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createVectorNodeFromUnsafeArray(Document $doc, array $values): VectorNode
-    {
-        $i = 0;
-        $packed = true;
-
-        foreach ($values as $key => $value) {
-            if ($key !== $i++) {
-                $packed = false;
-                break;
-            }
-        }
-
-        return $packed
-            ? self::createArrayNodeFromUnsafePackedArray($doc, $values)
-            : self::createObjectNodeFromUnsafePropertyArray($doc, $values);
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createNodeFromUnsafeObject(Document $doc, object $object): Node
-    {
-        if ($object instanceof \stdClass) {
-            return self::createObjectNodeFromUnsafeStdClass($doc, $object);
-        }
-
-        if ($object instanceof \JsonSerializable) {
-            return self::createNodeFromUnsafeValue($doc, $object->jsonSerialize());
-        }
-
-        return self::createObjectNodeFromUnsafePropertyArray($doc, \get_object_vars($object));
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createNodeFromSafeValue(Document $doc, $value): Node
-    {
-        if (null !== $node = self::createScalarOrNullNodeFromValue($doc, $value)) {
-            return $node;
-        }
-
-        if (\is_object($value)) {
-            return self::createObjectNodeFromSafeStdClass($doc, $value);
-        }
-
-        if (\is_array($value)) {
-            return self::createArrayNodeFromSafePackedArray($doc, $value);
-        }
-
-        throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");
-    }
-
-    /**
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
-     */
-    private static function createNodeFromUnsafeValue(Document $doc, $value): Node
-    {
-        if (null !== $node = self::createScalarOrNullNodeFromValue($doc, $value)) {
-            return $node;
-        }
-
-        if (\is_object($value)) {
-            return self::createNodeFromUnsafeObject($doc, $value);
-        }
-
-        if (\is_array($value)) {
-            return self::createVectorNodeFromUnsafeArray($doc, $value);
-        }
-
-        throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");
+        static $factory;
+        return $factory ?? $factory = new UnsafeNodeFactory();
     }
 
     /**
@@ -289,7 +115,7 @@ final class Document implements \JsonSerializable
             $data = \ExceptionalJSON\decode($json, false, $depthLimit, $options & ~\JSON_OBJECT_AS_ARRAY);
 
             $doc = new self();
-            $doc->rootNode = self::createNodeFromSafeValue($doc, $data);
+            $doc->rootNode = self::getSafeNodeFactory()->createNodeFromValue($doc, $data);
 
             return $doc;
         } catch (DecodeErrorException $e) {
@@ -308,7 +134,7 @@ final class Document implements \JsonSerializable
     {
         try {
             $doc = new self();
-            $doc->rootNode = self::createNodeFromUnsafeValue($doc, $data);
+            $doc->rootNode = self::getUnsafeNodeFactory()->createNodeFromValue($doc, $data);
 
             return $doc;
         } catch (InvalidNodeValueException $e) {
