@@ -57,6 +57,9 @@ final class \DaveRandom\Jom\Document
 ### [Node](https://github.com/DaveRandom/JOM/blob/master/src/Node.php)
 
 ```php
+/**
+ * NOTE: Classes inheriting from Node that are not provided by this library will result in undefined behaviour.
+ */
 abstract class \DaveRandom\Jom\Node
     implements \JsonSerializable
 {
@@ -181,6 +184,10 @@ final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
 ### [VectorNode](https://github.com/DaveRandom/JOM/blob/master/src/VectorNode.php)
 
 ```php
+/**
+ * NOTE: Classes inheriting from VectorNode that are not provided by this library will result in undefined
+ * behaviour.
+ */
 abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node 
     implements \Countable, \IteratorAggregate, \ArrayAccess
 {
