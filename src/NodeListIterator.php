@@ -55,9 +55,13 @@ final class NodeListIterator implements \Iterator
 
     public function valid(): bool
     {
+        if ($this->currentNode !== null) {
+            return true;
+        }
+
         $this->notifyActivityStateChange(self::INACTIVE);
 
-        return $this->currentNode !== null;
+        return false;
     }
 
     public function rewind(): void

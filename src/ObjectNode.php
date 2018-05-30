@@ -8,9 +8,35 @@ use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 
 final class ObjectNode extends VectorNode
 {
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    public function __construct(?array $properties = [], ?Document $ownerDocument = null)
+    {
+        parent::__construct($ownerDocument);
+
+        try {
+            foreach ($properties ?? [] as $name => $node) {
+                $this->setProperty((string)$name, $node);
+            }
+        } catch (InvalidSubjectNodeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getPropertyNames(): array
+    {
+        return \array_keys($this->children);
+    }
+
     public function hasProperty(string $name): bool
     {
-        return isset($this->keyMap[$name]);
+        return isset($this->children[$name]);
     }
 
     /**
@@ -18,11 +44,11 @@ final class ObjectNode extends VectorNode
      */
     public function getProperty(string $name): Node
     {
-        if (!isset($this->keyMap[$name])) {
+        if (!isset($this->children[$name])) {
             throw new InvalidKeyException("Property '{$name}' does not exist on the object");
         }
 
-        return $this->keyMap[$name];
+        return $this->children[$name];
     }
 
     /**
@@ -31,10 +57,17 @@ final class ObjectNode extends VectorNode
      */
     public function setProperty(string $name, Node $value): void
     {
-        if (isset($this->keyMap[$name])) {
-            $this->replaceNode($value, $this->keyMap[$name]);
-        } else {
+        if (!isset($this->children[$name])) {
             $this->appendNode($value, $name);
+            return;
+        }
+
+        try {
+            $this->replaceNode($value, $this->children[$name]);
+        } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
     }
 

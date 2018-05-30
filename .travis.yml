@@ -10,7 +10,7 @@ before_script:
   - travis_retry composer install --no-interaction
 
 script:
-  - phpdbg -qrr vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
+  - phpdbg -qrr vendor/bin/phpunit --exclude-group=todo --coverage-text --coverage-clover=coverage.clover
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar

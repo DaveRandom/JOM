@@ -2,6 +2,7 @@
 
 namespace DaveRandom\Jom;
 
+use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 use DaveRandom\Jom\Exceptions\InvalidPointerException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
@@ -79,7 +80,25 @@ abstract class Node implements \JsonSerializable
         return new Pointer($path, \count($basePath), false);
     }
 
-    public function __construct(?Document $ownerDocument = null)
+    /**
+     * @throws InvalidNodeValueException
+     * @return static
+     */
+    public static function createFromValue($value, ?Document $ownerDocument = null): Node
+    {
+        static $nodeFactory;
+
+        try {
+            return ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
+                ->createNodeFromValue($value, $ownerDocument);
+        } catch (InvalidNodeValueException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+        }
+    }
+
+    protected function __construct(?Document $ownerDocument)
     {
         $this->ownerDocument = $ownerDocument;
     }

@@ -6,11 +6,11 @@ final class BooleanNode extends Node
 {
     private $value;
 
-    public function __construct(?Document $ownerDocument = null, bool $value = false)
+    public function __construct(?bool $value = false, ?Document $ownerDocument = null)
     {
         parent::__construct($ownerDocument);
 
-        $this->setValue($value);
+        $this->value = $value ?? false;
     }
 
     public function getValue(): bool

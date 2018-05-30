@@ -16,18 +16,6 @@ final class Document implements \JsonSerializable
     /** @var Node */
     private $rootNode;
 
-    private static function getSafeNodeFactory(): SafeNodeFactory
-    {
-        static $factory;
-        return $factory ?? $factory = new SafeNodeFactory();
-    }
-
-    private static function getUnsafeNodeFactory(): UnsafeNodeFactory
-    {
-        static $factory;
-        return $factory ?? $factory = new UnsafeNodeFactory();
-    }
-
     /**
      * @throws PointerReferenceNotFoundException
      */
@@ -84,7 +72,7 @@ final class Document implements \JsonSerializable
             throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
         }
 
-        $newNode = new $node($this);
+        $newNode = new $node(null, $this);
 
         foreach ($node as $key => $value) {
             $newNode[$key] = $this->import($value);
@@ -102,8 +90,14 @@ final class Document implements \JsonSerializable
             throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
         }
 
-        return new $node($this, $node->getValue());
+        try {
+            return Node::createFromValue($node->getValue(), $this);
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
+        }
     }
+
+    private function __construct() { }
 
     /**
      * @throws DocumentTreeCreationFailedException
@@ -111,36 +105,39 @@ final class Document implements \JsonSerializable
      */
     public static function parse(string $json, int $depthLimit = 512, int $options = 0): Document
     {
+        static $nodeFactory;
+
         try {
             $data = \ExceptionalJSON\decode($json, false, $depthLimit, $options & ~\JSON_OBJECT_AS_ARRAY);
 
             $doc = new self();
-            $doc->rootNode = self::getSafeNodeFactory()->createNodeFromValue($doc, $data);
+            $doc->rootNode = ($nodeFactory ?? $nodeFactory = new SafeNodeFactory)
+                ->createNodeFromValue($data, $doc);
 
             return $doc;
         } catch (DecodeErrorException $e) {
             throw new ParseFailureException("Decoding JSON string failed: {$e->getMessage()}", $e);
         } catch (InvalidNodeValueException $e) {
             throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
-        } catch (\Throwable $e) {
-            throw new DocumentTreeCreationFailedException("Unexpected error: {$e->getMessage()}", $e);
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
         }
     }
 
     /**
      * @throws DocumentTreeCreationFailedException
      */
-    public static function createFromData($data): Document
+    public static function createFromValue($value): Document
     {
         try {
             $doc = new self();
-            $doc->rootNode = self::getUnsafeNodeFactory()->createNodeFromValue($doc, $data);
+            $doc->rootNode = Node::createFromValue($value, $doc);
 
             return $doc;
         } catch (InvalidNodeValueException $e) {
             throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
-        } catch (\Throwable $e) {
-            throw new DocumentTreeCreationFailedException("Unexpected error: {$e->getMessage()}", $e);
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
         }
     }
 

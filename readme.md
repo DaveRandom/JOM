@@ -19,11 +19,6 @@ final class \DaveRandom\Jom\Document
     implements \JsonSerializable
 {
     /**
-     * Create an empty document.
-     */
-    public __construct();
-
-    /**
      * Create a Document instance from a JSON string, forwarding arguments to json_encode().
      *
      * @throws ParseFailureException when the supplied string cannot be parsed as JSON.
@@ -36,7 +31,7 @@ final class \DaveRandom\Jom\Document
      *
      * @throws DocumentTreeCreationFailedException when a document tree cannot be built from the supplied data.
      */
-    public static Document createFromData($data);
+    public static Document createFromValue($value);
 
     /**
      * Returns the root node of the document, or NULL if the document is empty.
@@ -64,9 +59,11 @@ abstract class \DaveRandom\Jom\Node
     implements \JsonSerializable
 {
     /**
-     * Default Node constructor
+     * Create a Node instance from a PHP value.
+     *
+     * @throws InvalidNodeValueException when a Node cannot be built from the supplied data.
      */
-    public __construct(?Document $ownerDocument = null);
+    public static Node createFromValue($value);
 
     /**
      * Returns the parent node of this node, or NULL if this is the root node or the node is not present in the
@@ -127,7 +124,13 @@ abstract class \DaveRandom\Jom\Node
 ### [NullNode](https://github.com/DaveRandom/JOM/blob/master/src/NullNode.php)
 
 ```php
-final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node { }
+final class \DaveRandom\Jom\NullNode extends \DaveRandom\Jom\Node
+{
+    /**
+     * Create a new NULL value node owned by the supplied document.
+     */
+    public __construct(?Document $ownerDocument = null);
+}
 ```
 
 ### [BooleanNode](https://github.com/DaveRandom/JOM/blob/master/src/BooleanNode.php)
@@ -138,7 +141,7 @@ final class \DaveRandom\Jom\BooleanNode extends \DaveRandom\Jom\Node
     /**
      * Create a new boolean value node owned by the supplied document.
      */
-    public __construct(?Document $ownerDocument = null, bool $value = false);
+    public __construct(?bool $value = false, ?Document $ownerDocument = null);
 
     /**
      * Set the value of this node
@@ -155,7 +158,7 @@ final class \DaveRandom\Jom\NumberNode extends \DaveRandom\Jom\Node
     /**
      * Create a new number value node owned by the supplied document.
      */
-    public __construct(?Document $ownerDocument = null, int|float $value = 0);
+    public __construct(int|float|null $value = 0, ?Document $ownerDocument = null);
 
     /**
      * Set the value of this node
@@ -172,7 +175,7 @@ final class \DaveRandom\Jom\StringNode extends \DaveRandom\Jom\Node
     /**
      * Create a new string value node owned by the supplied document.
      */
-    public __construct(?Document $ownerDocument = null, string $value = "");
+    public __construct(?string $value = "", ?Document $ownerDocument = null);
 
     /**
      * Set the value of this node
@@ -195,6 +198,11 @@ abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node
      * Returns the data represented by this node as an array.
      */
     public array toArray();
+    
+    /**
+     * Remove all child nodes.
+     */
+    public void clear();
 }
 ```
 
@@ -204,12 +212,18 @@ abstract class \DaveRandom\Jom\VectorNode extends \DaveRandom\Jom\Node
 final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
 {
     /**
-     * Append a node to the array.
+     * Create a new array node owned by the supplied document.
+     */
+    public __construct(Node[] $values = null, ?Document $ownerDocument = null);
+
+    /**
+     * Append one or more nodes to the array.
      *
-     * @throws InvalidSubjectNodeException when $node is invalid.
+     * @throws EmptySubjectNodeListException when no nodes are supplied 
+     * @throws InvalidSubjectNodeException when one of the supplied nodes is invalid.
      * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public void push(Node $node);
+    public void push(Node ...$nodes);
 
     /**
      * Remove the last node from the array, if any, and return it.
@@ -219,12 +233,13 @@ final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
     public ?Node pop();
 
     /**
-     * Prepend a node to the array.
+     * Prepend one or more nodes to the array.
      *
-     * @throws InvalidSubjectNodeException when $node is invalid.
+     * @throws EmptySubjectNodeListException when no nodes are supplied 
+     * @throws InvalidSubjectNodeException when one of the supplied nodes is invalid.
      * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public void unshift(Node $node);
+    public void unshift(Node ...$nodes);
 
     /**
      * Remove the first node from the array, if any, and return it.
@@ -236,18 +251,20 @@ final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
     /**
      * Insert a new node before the supplied reference node. If $beforeNode is NULL it is equivalent to push().
      *
-     * @throws InvalidSubjectNodeException when $beforeNode is not a member of the array, or $node is invalid.
+     * @throws InvalidSubjectNodeException when $node is invalid.
+     * @throws InvalidReferenceNodeException when $beforeNode is not a member of the array
      * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
     public void insert(Node $node, ?Node $beforeNode);
 
     /**
-     * Replace the old $nodeOrKey with the supplied node.
+     * Replace an existing node object or the node at the supplied index with a new node.
      *
-     * @throws InvalidSubjectNodeException when $nodeOrKey is not a member of the array, or $newNode is invalid.
+     * @throws InvalidSubjectNodeException when $newNode is invalid.
+     * @throws InvalidReferenceNodeException when $nodeOrIndex is not a member of the array
      * @throws WriteOperationForbiddenException when there is an active iterator for the array.
      */
-    public void replace(Node|int $nodeOrKey, Node $newNode);
+    public void replace(Node|int $nodeOrIndex, Node $newNode);
 
     /**
      * Remove the supplied node from the array.
@@ -264,6 +281,16 @@ final class \DaveRandom\Jom\ArrayNode extends \DaveRandom\Jom\VectorNode
 ```php
 final class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
 {
+    /**
+     * Create a new array node owned by the supplied document.
+     */
+    public __construct(Node[] $properties = null, ?Document $ownerDocument = null);
+
+    /**
+     * Returns a list of the object's property names.
+     */
+    public string[] getPropertyNames();
+
     /**
      * Returns TRUE if the object has a property with the supplied name, otherwise FALSE.
      */
@@ -303,7 +330,9 @@ final class \DaveRandom\Jom\ObjectNode extends \DaveRandom\Jom\VectorNode
       ├ \DaveRandom\Jom\Exceptions\DocumentTreeCreationFailedException Ⓕ
       ├ \DaveRandom\Jom\Exceptions\InvalidNodeValueException Ⓕ
       ├ \DaveRandom\Jom\Exceptions\InvalidOperationException Ⓐ
+      │   ├ \DaveRandom\Jom\Exceptions\EmptySubjectNodeListException Ⓕ
       │   ├ \DaveRandom\Jom\Exceptions\InvalidKeyException Ⓕ
+      │   ├ \DaveRandom\Jom\Exceptions\InvalidReferenceNodeException Ⓕ
       │   ├ \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException Ⓕ
       │   └ \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException Ⓕ
       ├ \DaveRandom\Jom\Exceptions\InvalidPointerException Ⓕ

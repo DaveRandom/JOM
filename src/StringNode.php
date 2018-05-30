@@ -6,11 +6,11 @@ final class StringNode extends Node
 {
     private $value;
 
-    public function __construct(?Document $ownerDocument = null, string $value = '')
+    public function __construct(?string $value = '', ?Document $ownerDocument = null)
     {
         parent::__construct($ownerDocument);
 
-        $this->setValue($value);
+        $this->value = $value ?? '';
     }
 
     public function getValue(): string

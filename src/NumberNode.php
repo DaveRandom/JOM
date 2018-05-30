@@ -9,11 +9,11 @@ final class NumberNode extends Node
     /**
      * @param int|float $value
      */
-    public function __construct(?Document $ownerDocument = null, $value = 0)
+    public function __construct($value = 0, ?Document $ownerDocument = null)
     {
         parent::__construct($ownerDocument);
 
-        $this->setValue($value);
+        $this->setValue($value ?? 0);
     }
 
     /**

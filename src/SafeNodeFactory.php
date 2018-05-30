@@ -9,18 +9,24 @@ final class SafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    public function createNodeFromValue(Document $doc, $value): Node
+    public function createNodeFromValue($value, ?Document $doc = null): Node
     {
-        if (null !== $node = $this->createScalarOrNullNodeFromValue($doc, $value)) {
-            return $node;
-        }
+        try {
+            if (null !== $node = $this->createScalarOrNullNodeFromValue($value, $doc)) {
+                return $node;
+            }
 
-        if ($value instanceof \stdClass) {
-            return $this->createObjectNodeFromStdClass($doc, $value);
-        }
+            if (\is_object($value)) {
+                return $this->createObjectNodeFromPropertyMap($value, $doc);
+            }
 
-        if (\is_array($value)) {
-            return $this->createArrayNodeFromPackedArray($doc, $value);
+            if (\is_array($value)) {
+                return $this->createArrayNodeFromPackedArray($value, $doc);
+            }
+        } catch (InvalidNodeValueException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
 
         throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");

@@ -2,16 +2,19 @@
 
 namespace DaveRandom\Jom;
 
+use DaveRandom\Jom\Exceptions\EmptySubjectNodeListException;
 use DaveRandom\Jom\Exceptions\InvalidKeyException;
+use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
 final class ArrayNode extends VectorNode
 {
-    private function incrementKeys(?Node $current): void
+    private function incrementKeys(?Node $current, int $amount = 1): void
     {
         while ($current !== null) {
-            $this->keyMap[++$current->key] = $current;
+            $current->key += $amount;
+            $this->children[$current->key] = $current;
             $current = $current->nextSibling;
         }
     }
@@ -19,19 +22,46 @@ final class ArrayNode extends VectorNode
     private function decrementKeys(?Node $current): void
     {
         while ($current !== null) {
-            unset($this->keyMap[$current->key]);
-            $this->keyMap[--$current->key] = $current;
+            unset($this->children[$current->key]);
+            $this->children[--$current->key] = $current;
             $current = $current->nextSibling;
+        }
+    }
+
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    public function __construct(?array $children = [], ?Document $ownerDocument = null)
+    {
+        parent::__construct($ownerDocument);
+
+        try {
+            $i = 0;
+
+            foreach ($children ?? [] as $child) {
+                $this->appendNode($child, $i++);
+            }
+        } catch (InvalidSubjectNodeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
     }
 
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws EmptySubjectNodeListException
      */
-    public function push(Node $node): void
+    public function push(Node ...$nodes): void
     {
-        $this->appendNode($node, \count($this->keyMap));
+        if (empty($nodes)) {
+            throw new EmptySubjectNodeListException("List of nodes to push must contain at least one node");
+        }
+
+        foreach ($nodes as $node) {
+            $this->appendNode($node, \count($this->children));
+        }
     }
 
     /**
@@ -47,8 +77,10 @@ final class ArrayNode extends VectorNode
 
         try {
             $this->remove($node);
-        } catch (InvalidSubjectNodeException $e) {
-            \assert(false, new \Error("Unexpected InvalidSubjectNodeException", 0, $e));
+        } catch (WriteOperationForbiddenException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
 
         return $node;
@@ -57,10 +89,27 @@ final class ArrayNode extends VectorNode
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws EmptySubjectNodeListException
      */
-    public function unshift(Node $node): void
+    public function unshift(Node ...$nodes): void
     {
-        $this->insert($node, $this->firstChild);
+        if (empty($nodes)) {
+            throw new EmptySubjectNodeListException("List of nodes to unshift must contain at least one node");
+        }
+
+        try {
+            $beforeNode = $this->firstChild;
+
+            foreach ($nodes as $key => $node) {
+                $this->insertNode($node, $key, $beforeNode);
+            }
+
+            $this->incrementKeys($beforeNode, \count($nodes));
+        } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+        }
     }
 
     /**
@@ -76,8 +125,10 @@ final class ArrayNode extends VectorNode
 
         try {
             $this->remove($node);
-        } catch (InvalidSubjectNodeException $e) {
-            \assert(false, new \Error("Unexpected InvalidSubjectNodeException", 0, $e));
+        } catch (WriteOperationForbiddenException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
 
         return $node;
@@ -86,17 +137,18 @@ final class ArrayNode extends VectorNode
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws InvalidReferenceNodeException
      */
     public function insert(Node $node, ?Node $beforeNode): void
     {
         if ($beforeNode === null) {
-            $this->appendNode($node, \count($this->keyMap));
+            $this->appendNode($node, \count($this->children));
             return;
         }
 
         $key = $beforeNode !== null
             ? $beforeNode->key
-            : \count($this->keyMap);
+            : \count($this->children);
 
         $this->insertNode($node, $key, $beforeNode);
 
@@ -107,6 +159,7 @@ final class ArrayNode extends VectorNode
      * @param Node|int $nodeOrIndex
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws InvalidReferenceNodeException
      * @throws InvalidKeyException
      */
     public function replace($nodeOrIndex, Node $newNode): void
@@ -132,11 +185,11 @@ final class ArrayNode extends VectorNode
      */
     public function offsetGet($index): Node
     {
-        if (!isset($this->keyMap[$index])) {
+        if (!isset($this->children[$index])) {
             throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
         }
 
-        return $this->keyMap[$index];
+        return $this->children[$index];
     }
 
     /**
@@ -146,30 +199,38 @@ final class ArrayNode extends VectorNode
      */
     public function offsetSet($index, $value): void
     {
-        if (!($value instanceof Node)) {
-            throw new \TypeError('Child must be instance of ' . Node::class);
+        try {
+            if (!($value instanceof Node)) {
+                throw new \TypeError('Child must be instance of ' . Node::class);
+            }
+
+            if ($index === null) {
+                $this->push($value);
+                return;
+            }
+
+            if (!\is_int($index) && !\ctype_digit($index)) {
+                throw new \TypeError('Index must be an integer');
+            }
+
+            $index = (int)$index;
+
+            if (isset($this->children[$index])) {
+                $this->replaceNode($value, $this->children[$index]);
+                return;
+            }
+
+            if (isset($this->children[$index - 1])) {
+                $this->push($value);
+                return;
+            }
+        } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
 
-        if ($index === null) {
-            $this->push($value);
-            return;
-        }
-
-        if (!\is_int($index) && !\ctype_digit($index)) {
-            throw new \TypeError('Index must be an integer');
-        }
-
-        $index = (int)$index;
-
-        if (isset($this->keyMap[$index])) {
-            $this->replaceNode($value, $this->keyMap[$index]);
-        }
-
-        if (!isset($this->keyMap[$index - 1])) {
-            throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
-        }
-
-        $this->push($value);
+        throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
     }
 
     public function getValue(): array

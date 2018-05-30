@@ -3,8 +3,6 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
-use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
-use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 
 abstract class NodeFactory
 {
@@ -16,38 +14,46 @@ abstract class NodeFactory
     ];
 
     /**
-     * @throws WriteOperationForbiddenException
      * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
      */
-    final protected function createArrayNodeFromPackedArray(Document $doc, array $values): ArrayNode
+    final protected function createArrayNodeFromPackedArray(array $values, ?Document $doc): ArrayNode
     {
-        $node = new ArrayNode($doc);
+        try {
+            $node = new ArrayNode([], $doc);
 
-        foreach ($values as $value) {
-            $node->push($this->createNodeFromValue($doc, $value));
+            foreach ($values as $value) {
+                $node->push($this->createNodeFromValue($value, $doc));
+            }
+
+            return $node;
+        } catch (InvalidNodeValueException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
-
-        return $node;
     }
 
     /**
-     * @throws WriteOperationForbiddenException
      * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
      */
-    final protected function createObjectNodeFromStdClass(Document $doc, \stdClass $values): ObjectNode
+    final protected function createObjectNodeFromPropertyMap($properties, ?Document $doc): ObjectNode
     {
-        $node = new ObjectNode($doc);
+        try {
+            $node = new ObjectNode([], $doc);
 
-        foreach ($values as $key => $value) {
-            $node->setProperty($key, $this->createNodeFromValue($doc, $value));
+            foreach ($properties as $name => $value) {
+                $node->setProperty($name, $this->createNodeFromValue($value, $doc));
+            }
+
+            return $node;
+        } catch (InvalidNodeValueException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
-
-        return $node;
     }
 
-    final protected function createScalarOrNullNodeFromValue(Document $doc, $value): ?Node
+    final protected function createScalarOrNullNodeFromValue($value, ?Document $doc): ?Node
     {
         if ($value === null) {
             return new NullNode($doc);
@@ -56,16 +62,14 @@ abstract class NodeFactory
         $className = self::SCALAR_VALUE_NODE_CLASSES[\gettype($value)] ?? null;
 
         if ($className !== null) {
-            return new $className($doc, $value);
+            return new $className($value, $doc);
         }
 
         return null;
     }
 
     /**
-     * @throws WriteOperationForbiddenException
      * @throws InvalidNodeValueException
-     * @throws InvalidSubjectNodeException
      */
-    abstract public function createNodeFromValue(Document $doc, $value): Node;
+    abstract public function createNodeFromValue($value, ?Document $doc = null): Node;
 }

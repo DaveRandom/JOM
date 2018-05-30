@@ -3,6 +3,7 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidKeyException;
+use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 
@@ -15,7 +16,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     protected $lastChild;
 
     /** @var Node[] */
-    protected $keyMap = [];
+    protected $children = [];
 
     protected $activeIteratorCount = 0;
 
@@ -28,8 +29,8 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
             return $nodeOrKey;
         }
 
-        if (isset($this->keyMap[$nodeOrKey])) {
-            return $this->keyMap[$nodeOrKey];
+        if (isset($this->children[$nodeOrKey])) {
+            return $this->children[$nodeOrKey];
         }
 
         throw new InvalidKeyException("{$nodeOrKey} does not reference a valid child node");
@@ -55,7 +56,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
 
         $node->parent = $this;
         $node->key = $key;
-        $this->keyMap[$key] = $node;
+        $this->children[$key] = $node;
 
         $previous = $this->lastChild;
 
@@ -74,6 +75,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws InvalidReferenceNodeException
      */
     protected function insertNode(Node $node, $key, Node $beforeNode = null): Node
     {
@@ -94,12 +96,12 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
 
         if ($beforeNode->parent !== $this) {
-            throw new InvalidSubjectNodeException('Reference node not present in children of this node');
+            throw new InvalidReferenceNodeException('Reference node not present in children of this node');
         }
 
         $node->parent = $this;
         $node->key = $key;
-        $this->keyMap[$key] = $node;
+        $this->children[$key] = $node;
 
         $node->nextSibling = $beforeNode;
         $beforeNode->previousSibling = $node;
@@ -114,6 +116,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
+     * @throws InvalidReferenceNodeException
      */
     protected function replaceNode(Node $newNode, Node $oldNode): Node
     {
@@ -130,7 +133,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
 
         if ($oldNode->parent !== $this) {
-            throw new InvalidSubjectNodeException('Reference node not present in children of this node');
+            throw new InvalidReferenceNodeException('Reference node not present in children of this node');
         }
 
         $newNode->parent = $oldNode->parent;
@@ -138,7 +141,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         $newNode->nextSibling = $oldNode->nextSibling;
 
         $newNode->key = $oldNode->key;
-        $this->keyMap[$oldNode->key] = $newNode;
+        $this->children[$oldNode->key] = $newNode;
 
         if ($oldNode->previousSibling) {
             $oldNode->previousSibling->nextSibling = $newNode;
@@ -190,7 +193,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         $node->previousSibling = null;
         $node->nextSibling = null;
 
-        unset($this->keyMap[$node->key]);
+        unset($this->children[$node->key]);
         $node->key = null;
 
         return $node;
@@ -198,7 +201,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
 
     public function hasChildren(): bool
     {
-        return !empty($this->keyMap);
+        return !empty($this->children);
     }
 
     public function getFirstChild(): ?Node
@@ -209,6 +212,17 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     public function getLastChild(): ?Node
     {
         return $this->lastChild;
+    }
+
+    final public function clear(): void
+    {
+        try {
+            while ($this->lastChild !== null) {
+                $this->removeNode($this->lastChild);
+            }
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+        }
     }
 
     final public function getIterator(): NodeListIterator
@@ -224,7 +238,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
 
     final public function count(): int
     {
-        return \count($this->keyMap);
+        return \count($this->children);
     }
 
     final public function jsonSerialize(): array
@@ -232,19 +246,19 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         return \iterator_to_array($this->getIterator());
     }
 
-    public function offsetExists($index): bool
+    public function offsetExists($key): bool
     {
-        return isset($this->keyMap[$index]);
+        return isset($this->children[$key]);
     }
 
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      */
-    public function offsetUnset($index): void
+    public function offsetUnset($key): void
     {
-        if (isset($this->keyMap[$index])) {
-            $this->removeNode($this->keyMap[$index]);
+        if (isset($this->children[$key])) {
+            $this->removeNode($this->children[$key]);
         }
     }
 
