@@ -4,17 +4,22 @@ namespace DaveRandom\Jom;
 
 final class NodeListIterator implements \Iterator
 {
-    public const INACTIVE = 0;
+    public const INACTIVE = -1;
     public const ACTIVE = 1;
 
+    /** @var Node|null */
     private $firstNode;
+
+    /** @var callable|null */
     private $activityStateChangeNotifier;
+
+    /** @var int */
     private $activityState = self::INACTIVE;
 
-    /** @var Node */
+    /** @var Node|null */
     private $currentNode;
 
-    public function __construct(Node $firstNode, callable $activityStateChangeNotifier = null)
+    public function __construct(?Node $firstNode, callable $activityStateChangeNotifier = null)
     {
         $this->firstNode = $firstNode;
         $this->activityStateChangeNotifier = $activityStateChangeNotifier;
@@ -45,12 +50,16 @@ final class NodeListIterator implements \Iterator
 
     public function next(): void
     {
-        $this->currentNode = $this->currentNode->getNextSibling();
+        if ($this->currentNode !== null) {
+            $this->currentNode = $this->currentNode->getNextSibling();
+        }
     }
 
     public function key()
     {
-        return $this->currentNode->getKey();
+        return $this->currentNode !== null
+            ? $this->currentNode->getKey()
+            : null;
     }
 
     public function valid(): bool

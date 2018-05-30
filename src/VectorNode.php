@@ -246,10 +246,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     final public function getIterator(): NodeListIterator
     {
         return new NodeListIterator($this->firstChild, function($state) {
-            $this->activeIteratorCount += $state === NodeListIterator::INACTIVE
-                ? -1
-                : 1;
-
+            $this->activeIteratorCount += $state;
             \assert($this->activeIteratorCount >= 0, new \Error('Vector node active iterator count is negative'));
         });
     }
