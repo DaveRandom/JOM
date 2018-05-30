@@ -21,6 +21,59 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     protected $activeIteratorCount = 0;
 
     /**
+     * @throws WriteOperationForbiddenException
+     */
+    private function checkWritable(): void
+    {
+        if ($this->activeIteratorCount !== 0) {
+            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
+        }
+    }
+
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    private function checkSubjectNodeIsOrphan(Node $node): void
+    {
+        if ($node->parent !== null) {
+            throw new InvalidSubjectNodeException('Node already present in the document');
+        }
+    }
+
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    private function checkSubjectNodeHasSameOwner(Node $node): void
+    {
+        if ($node->ownerDocument !== $this->ownerDocument) {
+            throw new InvalidSubjectNodeException('Node belongs to a different document');
+        }
+
+    }
+
+    /**
+     * @throws InvalidSubjectNodeException
+     */
+    private function checkSubjectNodeIsChild(Node $node): void
+    {
+        if ($node->parent !== $this) {
+            throw new InvalidSubjectNodeException('Node not present in children of this node');
+        }
+
+    }
+
+    /**
+     * @throws InvalidReferenceNodeException
+     */
+    private function checkReferenceNodeIsChild(Node $node): void
+    {
+        if ($node->parent !== $this) {
+            throw new InvalidReferenceNodeException('Reference node not present in children of this node');
+        }
+
+    }
+
+    /**
      * @throws InvalidKeyException
      */
     protected function resolveNode($nodeOrKey): Node
@@ -42,17 +95,9 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function appendNode(Node $node, $key): Node
     {
-        if ($this->activeIteratorCount !== 0) {
-            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
-        }
-
-        if ($node->ownerDocument !== $this->ownerDocument) {
-            throw new InvalidSubjectNodeException('Node belongs to a different document');
-        }
-
-        if ($node->parent !== null) {
-            throw new InvalidSubjectNodeException('Node already present in the document');
-        }
+        $this->checkWritable();
+        $this->checkSubjectNodeHasSameOwner($node);
+        $this->checkSubjectNodeIsOrphan($node);
 
         $node->parent = $this;
         $node->key = $key;
@@ -83,21 +128,10 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
             return $this->appendNode($node, $key);
         }
 
-        if ($this->activeIteratorCount !== 0) {
-            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
-        }
-
-        if ($node->ownerDocument !== $this->ownerDocument) {
-            throw new InvalidSubjectNodeException('Node belongs to a different document');
-        }
-
-        if ($node->parent !== null) {
-            throw new InvalidSubjectNodeException('Node already present in the document');
-        }
-
-        if ($beforeNode->parent !== $this) {
-            throw new InvalidReferenceNodeException('Reference node not present in children of this node');
-        }
+        $this->checkWritable();
+        $this->checkSubjectNodeHasSameOwner($node);
+        $this->checkSubjectNodeIsOrphan($node);
+        $this->checkReferenceNodeIsChild($beforeNode);
 
         $node->parent = $this;
         $node->key = $key;
@@ -120,21 +154,10 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function replaceNode(Node $newNode, Node $oldNode): Node
     {
-        if ($this->activeIteratorCount !== 0) {
-            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
-        }
-
-        if ($newNode->ownerDocument !== $this->ownerDocument) {
-            throw new InvalidSubjectNodeException('Node belongs to a different document');
-        }
-
-        if ($newNode->parent !== null) {
-            throw new InvalidSubjectNodeException('Node already present in the document');
-        }
-
-        if ($oldNode->parent !== $this) {
-            throw new InvalidReferenceNodeException('Reference node not present in children of this node');
-        }
+        $this->checkWritable();
+        $this->checkSubjectNodeHasSameOwner($newNode);
+        $this->checkSubjectNodeIsOrphan($newNode);
+        $this->checkReferenceNodeIsChild($oldNode);
 
         $newNode->parent = $oldNode->parent;
         $newNode->previousSibling = $oldNode->previousSibling;
@@ -165,13 +188,8 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function removeNode(Node $node): Node
     {
-        if ($this->activeIteratorCount !== 0) {
-            throw new WriteOperationForbiddenException('Cannot modify a vector with an active iterator');
-        }
-
-        if ($node->parent !== $this) {
-            throw new InvalidSubjectNodeException('Node not present in children of this node');
-        }
+        $this->checkWritable();
+        $this->checkSubjectNodeIsChild($node);
 
         if ($this->firstChild === $node) {
             $this->firstChild = $node->nextSibling;
