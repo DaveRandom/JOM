@@ -21,9 +21,11 @@ final class ObjectNode extends VectorNode
             }
         } catch (InvalidSubjectNodeException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**
@@ -66,9 +68,11 @@ final class ObjectNode extends VectorNode
             $this->replaceNode($value, $this->children[$name]);
         } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**

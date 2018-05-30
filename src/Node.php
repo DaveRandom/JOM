@@ -93,9 +93,11 @@ abstract class Node implements \JsonSerializable
                 ->createNodeFromValue($value, $ownerDocument);
         } catch (InvalidNodeValueException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     protected function __construct(?Document $ownerDocument)

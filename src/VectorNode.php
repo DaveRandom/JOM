@@ -238,9 +238,11 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
             while ($this->lastChild !== null) {
                 $this->removeNode($this->lastChild);
             }
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     final public function getIterator(): NodeListIterator

@@ -25,9 +25,11 @@ final class SafeNodeFactory extends NodeFactory
             }
         } catch (InvalidNodeValueException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
 
         throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");
     }

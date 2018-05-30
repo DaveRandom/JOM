@@ -92,9 +92,11 @@ final class Document implements \JsonSerializable
 
         try {
             return Node::createFromValue($node->getValue(), $this);
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     private function __construct() { }
@@ -119,9 +121,11 @@ final class Document implements \JsonSerializable
             throw new ParseFailureException("Decoding JSON string failed: {$e->getMessage()}", $e);
         } catch (InvalidNodeValueException $e) {
             throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**
@@ -136,9 +140,11 @@ final class Document implements \JsonSerializable
             return $doc;
         } catch (InvalidNodeValueException $e) {
             throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}");
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     public function getRootNode(): ?Node

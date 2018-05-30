@@ -28,9 +28,11 @@ abstract class NodeFactory
             return $node;
         } catch (InvalidNodeValueException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**
@@ -48,9 +50,11 @@ abstract class NodeFactory
             return $node;
         } catch (InvalidNodeValueException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     final protected function createScalarOrNullNodeFromValue($value, ?Document $doc): ?Node

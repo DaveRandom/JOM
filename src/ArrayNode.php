@@ -43,9 +43,11 @@ final class ArrayNode extends VectorNode
             }
         } catch (InvalidSubjectNodeException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**
@@ -79,9 +81,11 @@ final class ArrayNode extends VectorNode
             $this->remove($node);
         } catch (WriteOperationForbiddenException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
 
         return $node;
     }
@@ -107,9 +111,11 @@ final class ArrayNode extends VectorNode
             $this->incrementKeys($beforeNode, \count($nodes));
         } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
     }
 
     /**
@@ -127,9 +133,11 @@ final class ArrayNode extends VectorNode
             $this->remove($node);
         } catch (WriteOperationForbiddenException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
 
         return $node;
     }
@@ -226,9 +234,11 @@ final class ArrayNode extends VectorNode
             }
         } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
             throw $e;
+        //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
+        //@codeCoverageIgnoreEnd
 
         throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
     }
