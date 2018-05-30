@@ -200,6 +200,15 @@ final class ArrayNode extends VectorNode
         return $this->children[$index];
     }
 
+    private function normalizeIndex($index): int
+    {
+        if (!\is_int($index) && !\ctype_digit($index)) {
+            throw new \TypeError('Index must be an integer');
+        }
+
+        return (int)$index;
+    }
+
     /**
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
@@ -208,20 +217,12 @@ final class ArrayNode extends VectorNode
     public function offsetSet($index, $value): void
     {
         try {
-            if (!($value instanceof Node)) {
-                throw new \TypeError('Child must be instance of ' . Node::class);
-            }
-
             if ($index === null) {
                 $this->push($value);
                 return;
             }
 
-            if (!\is_int($index) && !\ctype_digit($index)) {
-                throw new \TypeError('Index must be an integer');
-            }
-
-            $index = (int)$index;
+            $index = $this->normalizeIndex($index);
 
             if (isset($this->children[$index])) {
                 $this->replaceNode($value, $this->children[$index]);
