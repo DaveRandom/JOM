@@ -26,9 +26,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushUpdatesFirstChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($array->getFirstChild());
 
@@ -43,9 +43,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushUpdatesLastChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($array->getLastChild());
 
@@ -60,9 +60,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushedItemsAreAccessibleByIndex()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertThrows(InvalidKeyException::class, function() use($array) {
             $array->offsetGet(0);
@@ -98,9 +98,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildParent()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getParent());
         $this->assertNull($child2->getParent());
@@ -118,9 +118,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildKey()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getKey());
         $this->assertNull($child2->getKey());
@@ -138,9 +138,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildPreviousSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getPreviousSibling());
         $this->assertNull($child2->getPreviousSibling());
@@ -158,9 +158,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildNextSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
@@ -181,8 +181,8 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushExistingChildThrows()
     {
-        $array = new ArrayNode();
-        $child = new NullNode();
+        $array = new ArrayNode;
+        $child = new NullNode;
 
         $array->push($child);
         $array->push($child);
@@ -193,9 +193,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushChildOfOtherNodeThrows()
     {
-        $array1 = new ArrayNode();
-        $array2 = new ArrayNode();
-        $child = new NullNode();
+        $array1 = new ArrayNode;
+        $array2 = new ArrayNode;
+        $child = new NullNode;
 
         $array1->push($child);
         $array2->push($child);
@@ -206,7 +206,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushNodeWithOwnerDocumentInToOrphanedArrayThrows()
     {
-        $array = new ArrayNode();
+        $array = new ArrayNode;
         $child = new NullNode(Document::createFromValue(null));
 
         $array->push($child);
@@ -219,7 +219,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     {
         /** @var ArrayNode $array */
         $array = Document::createFromValue([])->getRootNode();
-        $child = new NullNode();
+        $child = new NullNode;
 
         $array->push($child);
     }
@@ -241,9 +241,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushWithActiveIteratorThrows()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $array->push($child1);
 
@@ -259,12 +259,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopReturnValue()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child2, $array->pop());
         $this->assertSame($child1, $array->pop());
@@ -273,12 +271,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopUpdatesFirstChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child1, $array->getFirstChild());
 
@@ -293,12 +289,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopUpdatesLastChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child2, $array->getLastChild());
 
@@ -313,12 +307,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPoppedItemsAreNoLongerAccessibleByIndex()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child1, $array->offsetGet(0));
         $this->assertSame($child1, $array[0]);
@@ -354,12 +346,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopClearsChildParent()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($array, $child1->getParent());
         $this->assertSame($array, $child2->getParent());
@@ -377,12 +367,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopClearsChildKey()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame(0, $child1->getKey());
         $this->assertSame(1, $child2->getKey());
@@ -400,12 +388,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopClearsChildPreviousSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertNull($child1->getPreviousSibling());
         $this->assertSame($child1, $child2->getPreviousSibling());
@@ -418,12 +404,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPopClearsChildNextSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child2, $child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
@@ -440,9 +424,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftUpdatesFirstChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($array->getFirstChild());
 
@@ -457,9 +441,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftUpdatesLastChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($array->getLastChild());
 
@@ -474,9 +458,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftedItemsAreAccessibleByIndex()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertThrows(InvalidKeyException::class, function() use($array) {
             $array->offsetGet(0);
@@ -512,9 +496,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftSetsChildParent()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getParent());
         $this->assertNull($child2->getParent());
@@ -532,9 +516,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftSetsChildKey()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getKey());
         $this->assertNull($child2->getKey());
@@ -552,9 +536,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftSetsChildPreviousSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getPreviousSibling());
         $this->assertNull($child2->getPreviousSibling());
@@ -572,9 +556,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testUnshiftSetsChildNextSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $this->assertNull($child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
@@ -595,8 +579,8 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnshiftExistingChildThrows()
     {
-        $array = new ArrayNode();
-        $child = new NullNode();
+        $array = new ArrayNode;
+        $child = new NullNode;
 
         $array->unshift($child);
         $array->unshift($child);
@@ -607,9 +591,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnshiftChildOfOtherNodeThrows()
     {
-        $array1 = new ArrayNode();
-        $array2 = new ArrayNode();
-        $child = new NullNode();
+        $array1 = new ArrayNode;
+        $array2 = new ArrayNode;
+        $child = new NullNode;
 
         $array1->unshift($child);
         $array2->unshift($child);
@@ -620,7 +604,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnshiftNodeWithOwnerDocumentInToOrphanedArrayThrows()
     {
-        $array = new ArrayNode();
+        $array = new ArrayNode;
         $child = new NullNode(Document::createFromValue(null));
 
         $array->unshift($child);
@@ -633,7 +617,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     {
         /** @var ArrayNode $array */
         $array = Document::createFromValue([])->getRootNode();
-        $child = new NullNode();
+        $child = new NullNode;
 
         $array->unshift($child);
     }
@@ -655,9 +639,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testUnshiftWithActiveIteratorThrows()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
+        $array = new ArrayNode;
+        $child1 = new NullNode;
+        $child2 = new NullNode;
 
         $array->unshift($child1);
 
@@ -673,12 +657,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftReturnValue()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child1, $array->shift());
         $this->assertSame($child2, $array->shift());
@@ -687,12 +669,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftUpdatesFirstChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child1, $array->getFirstChild());
 
@@ -707,12 +687,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftUpdatesLastChild()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child2, $array->getLastChild());
 
@@ -727,12 +705,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftedItemsAreNoLongerAccessibleByIndex()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child1, $array->offsetGet(0));
         $this->assertSame($child1, $array[0]);
@@ -768,12 +744,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftClearsChildParent()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($array, $child1->getParent());
         $this->assertSame($array, $child2->getParent());
@@ -791,12 +765,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftClearsChildKey()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame(0, $child1->getKey());
         $this->assertSame(1, $child2->getKey());
@@ -814,12 +786,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftClearsChildPreviousSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertNull($child1->getPreviousSibling());
         $this->assertSame($child1, $child2->getPreviousSibling());
@@ -832,12 +802,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testShiftClearsChildNextSibling()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->push($child1);
-        $array->push($child2);
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
 
         $this->assertSame($child2, $child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
@@ -1303,33 +1271,645 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testInsertNodeWithDifferentOwnerDocumentWithExistingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->getFirstChild();
+            $child2 = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testInsertNodeWithDifferentOwnerDocumentWithMissingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->pop();
+            $child2 = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testInsertNodeWithDifferentOwnerDocumentWithNullRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([])->getRootNode();
+            $child = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child, null);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testInsertWithActiveIteratorWithExistingRefNodeThrows()
+    {
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child1 = $array->getFirstChild();
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->insert($child2, $child1);
+        }
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testInsertWithActiveIteratorWithMissingRefNodeThrows()
+    {
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child1 = new NullNode;
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->insert($child2, $child1);
+        }
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testInsertWithActiveIteratorWithNullRefNodeThrows()
+    {
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->insert($child, null);
+        }
+    }
+
+    // endregion
+
+    // region replace()
+
+    public function testReplaceUpdatesFirstChildWhenRefNodeIsFirstChild()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child1, $array->getFirstChild());
+        $this->assertSame($child2, $array->getLastChild());
+
+        $array->replace($child3, $child1);
+
+        $this->assertSame($child3, $array->getFirstChild());
+        $this->assertSame($child2, $array->getLastChild());
+    }
+
+    public function testReplaceUpdatesLastChildWhenRefNodeIsLastChild()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child1, $array->getFirstChild());
+        $this->assertSame($child2, $array->getLastChild());
+
+        $array->replace($child3, $child2);
+
+        $this->assertSame($child1, $array->getFirstChild());
+        $this->assertSame($child3, $array->getLastChild());
+    }
+
+    public function testReplacedItemsAreAccessibleByIndex()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child1, $array->offsetGet(0));
+        $this->assertSame($child1, $array[0]);
+        $this->assertSame($child2, $array->offsetGet(1));
+        $this->assertSame($child2, $array[1]);
+
+        $array->replace($child3, $child1);
+
+        $this->assertSame($child3, $array->offsetGet(0));
+        $this->assertSame($child3, $array[0]);
+        $this->assertSame($child2, $array->offsetGet(1));
+        $this->assertSame($child2, $array[1]);
+
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child1, $array->offsetGet(0));
+        $this->assertSame($child1, $array[0]);
+        $this->assertSame($child2, $array->offsetGet(1));
+        $this->assertSame($child2, $array[1]);
+
+        $array->replace($child3, $child2);
+
+        $this->assertSame($child1, $array->offsetGet(0));
+        $this->assertSame($child1, $array[0]);
+        $this->assertSame($child3, $array->offsetGet(1));
+        $this->assertSame($child3, $array[1]);
+    }
+
+    public function testReplaceUpdatesChildParent()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
+        $child2 = new NullNode;
+
+        $this->assertSame($array, $child1->getParent());
+        $this->assertNull($child2->getParent());
+
+        $array->replace($child2, $child1);
+
+        $this->assertNull($child1->getParent());
+        $this->assertSame($array, $child2->getParent());
+    }
+
+    public function testReplaceUpdatesChildKey()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
+        $child2 = new NullNode;
+
+        $this->assertSame(0, $child1->getKey());
+        $this->assertNull($child2->getKey());
+
+        $array->replace($child2, $child1);
+
+        $this->assertNull($child1->getKey());
+        $this->assertSame(0, $child2->getKey());
+    }
+
+    public function testReplaceUpdatesChildPreviousSibling()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertNull($child1->getPreviousSibling());
+        $this->assertSame($child1, $child2->getPreviousSibling());
+        $this->assertNull($child3->getPreviousSibling());
+
+        $array->replace($child3, $child1);
+
+        $this->assertNull($child1->getPreviousSibling());
+        $this->assertSame($child3, $child2->getPreviousSibling());
+        $this->assertNull($child3->getPreviousSibling());
+
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertNull($child1->getPreviousSibling());
+        $this->assertSame($child1, $child2->getPreviousSibling());
+        $this->assertNull($child3->getPreviousSibling());
+
+        $array->replace($child3, $child2);
+
+        $this->assertNull($child1->getPreviousSibling());
+        $this->assertNull($child2->getPreviousSibling());
+        $this->assertSame($child1, $child3->getPreviousSibling());
+    }
+
+    public function testReplaceUpdatesChildNextSibling()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child2, $child1->getNextSibling());
+        $this->assertNull($child2->getNextSibling());
+        $this->assertNull($child3->getNextSibling());
+
+        $array->replace($child3, $child1);
+
+        $this->assertNull($child1->getNextSibling());
+        $this->assertNull($child2->getNextSibling());
+        $this->assertSame($child2, $child3->getNextSibling());
+
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+            $child2 = new NullNode,
+        ]);
+        $child3 = new NullNode;
+
+        $this->assertSame($child2, $child1->getNextSibling());
+        $this->assertNull($child2->getNextSibling());
+        $this->assertNull($child3->getNextSibling());
+
+        $array->replace($child3, $child2);
+
+        $this->assertSame($child3, $child1->getNextSibling());
+        $this->assertNull($child2->getNextSibling());
+        $this->assertNull($child3->getNextSibling());
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidReferenceNodeException
+     */
+    public function testReplaceWithMissingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode;
+            $child1 = new NullNode;
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->replace($child1, $child2);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceWithDuplicateRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode([
+                $child = new NullNode,
+            ]);
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->replace($child, $child);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceExistingChildWithExistingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode([
+                $child1 = new NullNode,
+                $child2 = new NullNode,
+            ]);
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->replace($child1, $child2);
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceExistingChildWithMissingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode([
+                $child1 = new NullNode,
+            ]);
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->replace($child1, $child2);
+    }
+
+    /**
      * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testInsertNodeWithDifferentOwnerDocumentThrows()
+    public function testReplaceChildOfOtherNodeWithExistingRefNodeThrows()
     {
-        /** @var ArrayNode $array */
-        $array = Document::createFromValue([])->getRootNode();
-        $child = new NullNode(Document::createFromValue(null));
+        try {
+            $array = new ArrayNode([
+                $child1 = new NullNode,
+            ]);
+            $child2 = ArrayNode::createFromValue([null])->getFirstChild();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
 
-        $array->unshift($child);
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceChildOfOtherNodeWithMissingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode;
+            $child1 = new NullNode;
+            $child2 = ArrayNode::createFromValue([null])->getFirstChild();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceChildOfOtherNodeWithNullRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode;
+            $child = ArrayNode::createFromValue([null])->getFirstChild();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child, null);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithExistingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode([
+                $child1 = new NullNode,
+            ]);
+            $child2 = Document::createFromValue(null)->getRootNode();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithMissingRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode;
+            $child1 = new NullNode;
+            $child2 = Document::createFromValue(null)->getRootNode();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithNullRefNodeThrows()
+    {
+        try {
+            $array = new ArrayNode;
+            $child = Document::createFromValue(null)->getRootNode();
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child, null);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithExistingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->getLastChild();
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithMissingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->pop();
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithNullRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child, null);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithDifferentOwnerDocumentWithExistingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->getFirstChild();
+            $child2 = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithDifferentOwnerDocumentWithMissingRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([null])->getRootNode();
+            $child1 = $array->pop();
+            $child2 = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child2, $child1);
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
+     */
+    public function testReplaceNodeWithDifferentOwnerDocumentWithNullRefNodeThrows()
+    {
+        try {
+            /** @var ArrayNode $array */
+            $array = Document::createFromValue([])->getRootNode();
+            $child = new NullNode(Document::createFromValue(null));
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        $array->insert($child, null);
     }
 
     /**
      * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
      */
-    public function testInsertWithActiveIteratorThrows()
+    public function testReplaceWithActiveIteratorWithExistingRefNodeThrows()
     {
-        $array = new ArrayNode();
-        $child1 = new NullNode();
-        $child2 = new NullNode();
-
-        $array->unshift($child1);
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child1 = $array->getFirstChild();
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
 
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach ($array as $unused) {
-            $array->unshift($child2);
+            $array->insert($child2, $child1);
+        }
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testReplaceWithActiveIteratorWithMissingRefNodeThrows()
+    {
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child1 = new NullNode;
+            $child2 = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->insert($child2, $child1);
+        }
+    }
+
+    /**
+     * @group todo
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testReplaceWithActiveIteratorWithNullRefNodeThrows()
+    {
+        try {
+            $array = ArrayNode::createFromValue([null]);
+            $child = new NullNode;
+        } catch (\Throwable $e) {
+            $this->fail("Unexpected error during setup: {$e->getMessage()}");
+            return;
+        }
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->insert($child, null);
         }
     }
 

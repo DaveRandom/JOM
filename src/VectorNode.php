@@ -18,6 +18,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     /** @var Node[] */
     protected $children = [];
 
+    /** @var int */
     protected $activeIteratorCount = 0;
 
     /**
@@ -73,6 +74,34 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
 
     }
 
+    private function updateFirstChildIfChanged(?Node $newNode, ?Node $oldNode): void
+    {
+        if ($this->firstChild === $oldNode) {
+            $this->firstChild = $newNode;
+        }
+    }
+
+    private function updateLastChildIfChanged(?Node $newNode, ?Node $oldNode): void
+    {
+        if ($this->lastChild === $oldNode) {
+            $this->lastChild = $newNode;
+        }
+    }
+
+    private function setNodePreviousSibling(?Node $node, ?Node $newSiblingNode): void
+    {
+        if ($node !== null) {
+            $node->previousSibling = $newSiblingNode;
+        }
+    }
+
+    private function setNodeNextSibling(?Node $node, ?Node $newSiblingNode): void
+    {
+        if ($node !== null) {
+            $node->nextSibling = $newSiblingNode;
+        }
+    }
+
     /**
      * @throws InvalidKeyException
      */
@@ -95,24 +124,26 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function appendNode(Node $node, $key): Node
     {
+        // Prevent modifying a collection with an active iterator
         $this->checkWritable();
+
+        // Validate arguments
         $this->checkSubjectNodeHasSameOwner($node);
         $this->checkSubjectNodeIsOrphan($node);
 
-        $node->parent = $this;
-        $node->key = $key;
+        // Update first/last child pointers
+        $this->updateFirstChildIfChanged($node, null);
+        $previousSibling = $this->lastChild;
+        $this->lastChild = $node;
+
+        // Update next sibling pointer of old $lastChild (no next sibling node to update)
+        $this->setNodeNextSibling($previousSibling, $node);
+
+        // Add the child to the key map
         $this->children[$key] = $node;
 
-        $previous = $this->lastChild;
-
-        $this->lastChild = $node;
-        $this->firstChild = $this->firstChild ?? $node;
-
-        $node->previousSibling = $previous;
-
-        if ($previous) {
-            $previous->nextSibling = $node;
-        }
+        // Set references on new child
+        $node->setReferences($this, $key, $previousSibling, null);
 
         return $node;
     }
@@ -122,27 +153,35 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      * @throws InvalidSubjectNodeException
      * @throws InvalidReferenceNodeException
      */
-    protected function insertNode(Node $node, $key, Node $beforeNode = null): Node
+    protected function insertNode(Node $node, $key, Node $before = null): Node
     {
-        if ($beforeNode === null) {
+        // A null $before reference means push the node on to the end of the list
+        if ($before === null) {
             return $this->appendNode($node, $key);
         }
 
+        // Prevent modifying a collection with an active iterator
         $this->checkWritable();
+
+        // Validate arguments
         $this->checkSubjectNodeHasSameOwner($node);
         $this->checkSubjectNodeIsOrphan($node);
-        $this->checkReferenceNodeIsChild($beforeNode);
+        $this->checkReferenceNodeIsChild($before);
 
-        $node->parent = $this;
-        $node->key = $key;
+        // Update first child pointer (last child pointer is not affected)
+        $this->updateFirstChildIfChanged($node, $before);
+
+        // Update next sibling pointer of previous sibling of $before
+        $this->setNodeNextSibling($before->previousSibling, $node);
+
+        // Replace the child in the key map
         $this->children[$key] = $node;
 
-        $node->nextSibling = $beforeNode;
-        $beforeNode->previousSibling = $node;
+        // Set references on new child
+        $node->setReferences($this, $key, $before->previousSibling, $before);
 
-        if ($this->firstChild === $beforeNode) {
-            $this->firstChild = $node;
-        }
+        // Update references on ref child
+        $before->setReferences($before->parent, $before->key, $node, $before->nextSibling);
 
         return $node;
     }
@@ -154,30 +193,30 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function replaceNode(Node $newNode, Node $oldNode): Node
     {
+        // Prevent modifying a collection with an active iterator
         $this->checkWritable();
+
+        // Validate arguments
         $this->checkSubjectNodeHasSameOwner($newNode);
         $this->checkSubjectNodeIsOrphan($newNode);
         $this->checkReferenceNodeIsChild($oldNode);
 
-        $newNode->parent = $oldNode->parent;
-        $newNode->previousSibling = $oldNode->previousSibling;
-        $newNode->nextSibling = $oldNode->nextSibling;
+        // Update first/last child pointers
+        $this->updateFirstChildIfChanged($newNode, $oldNode);
+        $this->updateLastChildIfChanged($newNode, $oldNode);
 
-        $newNode->key = $oldNode->key;
+        // Update sibling pointers of sibling nodes
+        $this->setNodeNextSibling($oldNode->previousSibling, $newNode);
+        $this->setNodePreviousSibling($oldNode->nextSibling, $newNode);
+
+        // Replace the node in the key map
         $this->children[$oldNode->key] = $newNode;
 
-        if ($oldNode->previousSibling) {
-            $oldNode->previousSibling->nextSibling = $newNode;
-        }
+        // Copy references from old node to new node
+        $newNode->setReferences($oldNode->parent, $oldNode->key, $oldNode->previousSibling, $oldNode->nextSibling);
 
-        if ($oldNode->nextSibling) {
-            $oldNode->nextSibling->previousSibling = $newNode;
-        }
-
-        $oldNode->key = null;
-        $oldNode->parent = null;
-        $oldNode->previousSibling = null;
-        $oldNode->nextSibling = null;
+        // Clear references from old node
+        $oldNode->setReferences(null, null, null, null);
 
         return $oldNode;
     }
@@ -188,31 +227,25 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      */
     protected function removeNode(Node $node): Node
     {
+        // Prevent modifying a collection with an active iterator
         $this->checkWritable();
+
+        // Validate arguments
         $this->checkSubjectNodeIsChild($node);
 
-        if ($this->firstChild === $node) {
-            $this->firstChild = $node->nextSibling;
-        }
+        // Update first/last child pointers
+        $this->updateFirstChildIfChanged($node->nextSibling, $node);
+        $this->updateLastChildIfChanged($node->previousSibling, $node);
 
-        if ($this->lastChild === $node) {
-            $this->lastChild = $node->previousSibling;
-        }
+        // Update sibling pointers of sibling nodes
+        $this->setNodeNextSibling($node->previousSibling, $node->nextSibling);
+        $this->setNodePreviousSibling($node->nextSibling, $node->previousSibling);
 
-        if ($node->previousSibling) {
-            $node->previousSibling->nextSibling = $node->nextSibling;
-        }
-
-        if ($node->nextSibling) {
-            $node->nextSibling->previousSibling = $node->previousSibling;
-        }
-
-        $node->parent = null;
-        $node->previousSibling = null;
-        $node->nextSibling = null;
-
+        // Remove the node from the key map
         unset($this->children[$node->key]);
-        $node->key = null;
+
+        // Clear references from node
+        $node->setReferences(null, null, null, null);
 
         return $node;
     }

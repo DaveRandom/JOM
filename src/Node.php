@@ -89,8 +89,19 @@ abstract class Node implements \JsonSerializable
         static $nodeFactory;
 
         try {
-            return ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
+            $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
                 ->createNodeFromValue($value, $ownerDocument);
+
+            if (!($result instanceof static)) {
+                throw new InvalidNodeValueException(\sprintf(
+                    "Value of type %s parsed as %s, %s expected",
+                    \gettype($value),
+                    \get_class($result),
+                    static::class
+                ));
+            }
+
+            return $result;
         } catch (InvalidNodeValueException $e) {
             throw $e;
         //@codeCoverageIgnoreStart
@@ -103,6 +114,14 @@ abstract class Node implements \JsonSerializable
     protected function __construct(?Document $ownerDocument)
     {
         $this->ownerDocument = $ownerDocument;
+    }
+
+    final protected function setReferences(?Node $parent, $key, ?Node $previousSibling, ?Node $nextSibling): void
+    {
+        $this->parent = $parent;
+        $this->key = $key;
+        $this->previousSibling = $previousSibling;
+        $this->nextSibling = $nextSibling;
     }
 
     final public function getParent(): ?Node

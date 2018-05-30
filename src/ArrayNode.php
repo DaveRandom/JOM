@@ -165,14 +165,14 @@ final class ArrayNode extends VectorNode
 
     /**
      * @param Node|int $nodeOrIndex
-     * @throws WriteOperationForbiddenException
-     * @throws InvalidSubjectNodeException
-     * @throws InvalidReferenceNodeException
      * @throws InvalidKeyException
+     * @throws InvalidReferenceNodeException
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
      */
-    public function replace($nodeOrIndex, Node $newNode): void
+    public function replace(Node $newNode, $nodeOrIndex): void
     {
-        $this->replaceNode($this->resolveNode($nodeOrIndex), $newNode);
+        $this->replaceNode($newNode, $this->resolveNode($nodeOrIndex));
     }
 
     /**
