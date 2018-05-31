@@ -250,7 +250,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         return $node;
     }
 
-    public function __clone()
+    final public function __clone()
     {
         parent::__clone();
 
@@ -277,17 +277,17 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
     }
 
-    public function hasChildren(): bool
+    final public function hasChildren(): bool
     {
         return !empty($this->children);
     }
 
-    public function getFirstChild(): ?Node
+    final public function getFirstChild(): ?Node
     {
         return $this->firstChild;
     }
 
-    public function getLastChild(): ?Node
+    final public function getLastChild(): ?Node
     {
         return $this->lastChild;
     }
@@ -323,7 +323,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         return \iterator_to_array($this->getIterator());
     }
 
-    public function offsetExists($key): bool
+    final public function offsetExists($key): bool
     {
         return isset($this->children[$key]);
     }
@@ -332,7 +332,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      */
-    public function offsetUnset($key): void
+    final public function offsetUnset($key): void
     {
         if (isset($this->children[$key])) {
             $this->removeNode($this->children[$key]);
