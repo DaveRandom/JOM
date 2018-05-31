@@ -1564,7 +1564,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidReferenceNodeException
      */
-    public function testReplaceWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeThrows()
     {
         try {
             $array = new ArrayNode;
@@ -1581,7 +1581,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceWithDuplicateRefNodeThrows()
+    public function testReplaceExistingNodeWithItselfThrows()
     {
         try {
             $array = new ArrayNode([
@@ -1598,7 +1598,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceExistingChildWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeWithExistingChildThrows()
     {
         try {
             $array = new ArrayNode([
@@ -1616,7 +1616,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceExistingChildWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeWithExistingChildThrows()
     {
         try {
             $array = new ArrayNode([
@@ -1632,10 +1632,9 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceChildOfOtherNodeWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeWithChildOfOtherNodeThrows()
     {
         try {
             $array = new ArrayNode([
@@ -1647,14 +1646,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceChildOfOtherNodeWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeWithChildOfOtherNodeThrows()
     {
         try {
             $array = new ArrayNode;
@@ -1665,31 +1663,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceChildOfOtherNodeWithNullRefNodeThrows()
-    {
-        try {
-            $array = new ArrayNode;
-            $child = ArrayNode::createFromValue([null])->getFirstChild();
-        } catch (\Throwable $e) {
-            $this->fail("Unexpected error during setup: {$e->getMessage()}");
-            return;
-        }
-
-        $array->insert($child, null);
-    }
-
-    /**
-     * @group todo
-     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
-     */
-    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeInUnownedArrayWithOwnedNodeThrows()
     {
         try {
             $array = new ArrayNode([
@@ -1701,14 +1681,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeInUnownedArrayWithOwnedNodeThrows()
     {
         try {
             $array = new ArrayNode;
@@ -1719,31 +1698,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceNodeWithOwnerDocumentInToOrphanedArrayWithNullRefNodeThrows()
-    {
-        try {
-            $array = new ArrayNode;
-            $child = Document::createFromValue(null)->getRootNode();
-        } catch (\Throwable $e) {
-            $this->fail("Unexpected error during setup: {$e->getMessage()}");
-            return;
-        }
-
-        $array->insert($child, null);
-    }
-
-    /**
-     * @group todo
-     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
-     */
-    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeInOwnedArrayWithUnownedNodeThrows()
     {
         try {
             /** @var ArrayNode $array */
@@ -1755,14 +1716,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeInOwnedArrayWithUnownedNodeThrows()
     {
         try {
             /** @var ArrayNode $array */
@@ -1774,32 +1734,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceOrphanedNodeInToArrayWithOwnerDocumentWithNullRefNodeThrows()
-    {
-        try {
-            /** @var ArrayNode $array */
-            $array = Document::createFromValue([null])->getRootNode();
-            $child = new NullNode;
-        } catch (\Throwable $e) {
-            $this->fail("Unexpected error during setup: {$e->getMessage()}");
-            return;
-        }
-
-        $array->insert($child, null);
-    }
-
-    /**
-     * @group todo
-     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
-     */
-    public function testReplaceNodeWithDifferentOwnerDocumentWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeInOwnedArrayWithNodeWithDifferentOwnerThrows()
     {
         try {
             /** @var ArrayNode $array */
@@ -1811,14 +1752,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
-    public function testReplaceNodeWithDifferentOwnerDocumentWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeInOwnedArrayWithNodeWithDifferentOwnerThrows()
     {
         try {
             /** @var ArrayNode $array */
@@ -1830,32 +1770,13 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
             return;
         }
 
-        $array->insert($child2, $child1);
+        $array->replace($child2, $child1);
     }
 
     /**
-     * @group todo
-     * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
-     */
-    public function testReplaceNodeWithDifferentOwnerDocumentWithNullRefNodeThrows()
-    {
-        try {
-            /** @var ArrayNode $array */
-            $array = Document::createFromValue([])->getRootNode();
-            $child = new NullNode(Document::createFromValue(null));
-        } catch (\Throwable $e) {
-            $this->fail("Unexpected error during setup: {$e->getMessage()}");
-            return;
-        }
-
-        $array->insert($child, null);
-    }
-
-    /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
      */
-    public function testReplaceWithActiveIteratorWithExistingRefNodeThrows()
+    public function testReplaceExistingNodeWithActiveIteratorThrows()
     {
         try {
             $array = ArrayNode::createFromValue([null]);
@@ -1868,15 +1789,14 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach ($array as $unused) {
-            $array->insert($child2, $child1);
+            $array->replace($child2, $child1);
         }
     }
 
     /**
-     * @group todo
      * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
      */
-    public function testReplaceWithActiveIteratorWithMissingRefNodeThrows()
+    public function testReplaceMissingNodeWithActiveIteratorThrows()
     {
         try {
             $array = ArrayNode::createFromValue([null]);
@@ -1889,27 +1809,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach ($array as $unused) {
-            $array->insert($child2, $child1);
-        }
-    }
-
-    /**
-     * @group todo
-     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
-     */
-    public function testReplaceWithActiveIteratorWithNullRefNodeThrows()
-    {
-        try {
-            $array = ArrayNode::createFromValue([null]);
-            $child = new NullNode;
-        } catch (\Throwable $e) {
-            $this->fail("Unexpected error during setup: {$e->getMessage()}");
-            return;
-        }
-
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        foreach ($array as $unused) {
-            $array->insert($child, null);
+            $array->replace($child2, $child1);
         }
     }
 
@@ -1921,17 +1821,12 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
         // todo
     }
 
-    public function testReplace()
-    {
-        // todo
-    }
-
     public function testGetValue()
     {
         // todo
     }
 
-    public function testInToArray()
+    public function testToArray()
     {
         // todo
     }
