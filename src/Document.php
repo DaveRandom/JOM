@@ -147,6 +147,25 @@ final class Document implements \JsonSerializable
         //@codeCoverageIgnoreEnd
     }
 
+    /**
+     * @throws DocumentTreeCreationFailedException
+     */
+    public static function createFromNode(Node $node): Document
+    {
+        try {
+            $doc = new self();
+            $doc->rootNode = $doc->import($node);
+
+            return $doc;
+        } catch (InvalidNodeValueException $e) {
+            throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
+        //@codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+        }
+        //@codeCoverageIgnoreEnd
+    }
+
     public function getRootNode(): ?Node
     {
         return $this->rootNode;
