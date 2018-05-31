@@ -13,7 +13,7 @@ abstract class Node implements \JsonSerializable
     /** @var string|int|null */
     protected $key;
 
-    /** @var Node|null */
+    /** @var VectorNode|null */
     protected $parent;
 
     /** @var Node|null */
@@ -121,7 +121,7 @@ abstract class Node implements \JsonSerializable
         $this->setReferences(null, null, null, null);
     }
 
-    final protected function setReferences(?Node $parent, $key, ?Node $previousSibling, ?Node $nextSibling): void
+    final protected function setReferences(?VectorNode $parent, $key, ?Node $previousSibling, ?Node $nextSibling): void
     {
         $this->parent = $parent;
         $this->key = $key;
@@ -129,7 +129,7 @@ abstract class Node implements \JsonSerializable
         $this->nextSibling = $nextSibling;
     }
 
-    final public function getParent(): ?Node
+    final public function getParent(): ?VectorNode
     {
         return $this->parent;
     }
