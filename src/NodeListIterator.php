@@ -2,6 +2,8 @@
 
 namespace DaveRandom\Jom;
 
+use DaveRandom\Jom\Exceptions\CloneForbiddenException;
+
 final class NodeListIterator implements \Iterator
 {
     public const INACTIVE = -1;
@@ -23,6 +25,14 @@ final class NodeListIterator implements \Iterator
     {
         $this->firstNode = $firstNode;
         $this->activityStateChangeNotifier = $activityStateChangeNotifier;
+    }
+
+    /**
+     * @throws CloneForbiddenException
+     */
+    public function __clone()
+    {
+        throw new CloneForbiddenException(self::class . ' instance cannot be cloned');
     }
 
     private function notifyActivityStateChange(int $newState): void
