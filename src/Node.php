@@ -116,6 +116,11 @@ abstract class Node implements \JsonSerializable
         $this->ownerDocument = $ownerDocument;
     }
 
+    public function __clone()
+    {
+        $this->setReferences(null, null, null, null);
+    }
+
     final protected function setReferences(?Node $parent, $key, ?Node $previousSibling, ?Node $nextSibling): void
     {
         $this->parent = $parent;

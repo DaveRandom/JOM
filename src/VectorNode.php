@@ -250,6 +250,52 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         return $node;
     }
 
+    public function __clone()
+    {
+        parent::__clone();
+
+        // Store a reference to the first child
+        $currentOriginalChild = $this->firstChild;
+
+        // Reset the child ref properties
+        $this->firstChild = null;
+        $this->lastChild = null;
+        $this->children = [];
+        $this->activeIteratorCount = 0;
+
+        $previousNewChild = null;
+
+        // If the node has children, clone the first one, set the first child pointer and advance to the next child
+        if ($currentOriginalChild !== null) {
+            $currentNewChild = clone $currentOriginalChild;
+
+            // Set first child pointer to the new node and update the key map
+            $this->firstChild = $currentNewChild;
+            $this->children[$currentNewChild->key] = $currentNewChild;
+
+            // Advance to the next child
+            $previousNewChild = $currentNewChild;
+            $currentOriginalChild = $currentOriginalChild->nextSibling;
+        }
+
+        while ($currentOriginalChild !== null) {
+            $currentNewChild = clone $currentOriginalChild;
+
+            // Update the key map
+            $this->children[$currentNewChild->key] = $currentNewChild;
+
+            // Set the sibling refs with the previous node
+            $currentNewChild->previousSibling = $previousNewChild;
+            $previousNewChild->nextSibling = $currentNewChild;
+
+            // Advance to the next child
+            $previousNewChild = $currentNewChild;
+            $currentOriginalChild = $currentOriginalChild->nextSibling;
+        }
+
+        $this->lastChild = $previousNewChild ?? null;
+    }
+
     public function hasChildren(): bool
     {
         return !empty($this->children);
