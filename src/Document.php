@@ -2,7 +2,6 @@
 
 namespace DaveRandom\Jom;
 
-use DaveRandom\Jom\Exceptions\DocumentTreeCreationFailedException;
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 use DaveRandom\Jom\Exceptions\InvalidPointerException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
@@ -101,15 +100,10 @@ final class Document implements \JsonSerializable
 
     private function __construct() { }
 
-    /**
-     * @throws DocumentTreeCreationFailedException
-     */
     public function __clone()
     {
         try {
             $this->rootNode = $this->import($this->rootNode);
-        } catch (InvalidNodeValueException $e) {
-            throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
@@ -118,7 +112,6 @@ final class Document implements \JsonSerializable
     }
 
     /**
-     * @throws DocumentTreeCreationFailedException
      * @throws ParseFailureException
      */
     public static function parse(string $json, int $depthLimit = 512, int $options = 0): Document
@@ -135,8 +128,6 @@ final class Document implements \JsonSerializable
             return $doc;
         } catch (DecodeErrorException $e) {
             throw new ParseFailureException("Decoding JSON string failed: {$e->getMessage()}", $e);
-        } catch (InvalidNodeValueException $e) {
-            throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
@@ -145,7 +136,7 @@ final class Document implements \JsonSerializable
     }
 
     /**
-     * @throws DocumentTreeCreationFailedException
+     * @throws InvalidNodeValueException
      */
     public static function createFromValue($value): Document
     {
@@ -155,7 +146,7 @@ final class Document implements \JsonSerializable
 
             return $doc;
         } catch (InvalidNodeValueException $e) {
-            throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
+            throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
@@ -163,9 +154,6 @@ final class Document implements \JsonSerializable
         //@codeCoverageIgnoreEnd
     }
 
-    /**
-     * @throws DocumentTreeCreationFailedException
-     */
     public static function createFromNode(Node $node): Document
     {
         try {
@@ -173,8 +161,6 @@ final class Document implements \JsonSerializable
             $doc->rootNode = $doc->import($node);
 
             return $doc;
-        } catch (InvalidNodeValueException $e) {
-            throw new DocumentTreeCreationFailedException("Creating document tree failed: {$e->getMessage()}", $e);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
