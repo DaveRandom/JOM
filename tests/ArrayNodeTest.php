@@ -96,16 +96,29 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($child2, $array[1]);
     }
 
-    public function testPushSetsChildParent()
+    public function testPushMultipleItemsOrder()
     {
-        $array = new ArrayNode;
+        $array = ArrayNode::createFromValue([null]);
         $child1 = new NullNode;
         $child2 = new NullNode;
 
-        $this->assertNull($child1->getParent());
-        $this->assertNull($child2->getParent());
+        $array->push($child1, $child2);
 
-        $array->push($child1);
+        $this->assertSame($child2, $array->getLastChild());
+
+        $this->assertSame($child1, $array[1]);
+        $this->assertSame($child2, $array[2]);
+
+        $this->assertSame(1, $child1->getKey());
+        $this->assertSame(2, $child2->getKey());
+    }
+
+    public function testPushSetsChildParent()
+    {
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
+        $child2 = new NullNode;
 
         $this->assertSame($array, $child1->getParent());
         $this->assertNull($child2->getParent());
@@ -118,14 +131,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildKey()
     {
-        $array = new ArrayNode;
-        $child1 = new NullNode;
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
         $child2 = new NullNode;
-
-        $this->assertNull($child1->getKey());
-        $this->assertNull($child2->getKey());
-
-        $array->push($child1);
 
         $this->assertSame(0, $child1->getKey());
         $this->assertNull($child2->getKey());
@@ -138,14 +147,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildPreviousSibling()
     {
-        $array = new ArrayNode;
-        $child1 = new NullNode;
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
         $child2 = new NullNode;
-
-        $this->assertNull($child1->getPreviousSibling());
-        $this->assertNull($child2->getPreviousSibling());
-
-        $array->push($child1);
 
         $this->assertNull($child1->getPreviousSibling());
         $this->assertNull($child2->getPreviousSibling());
@@ -158,14 +163,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
     public function testPushSetsChildNextSibling()
     {
-        $array = new ArrayNode;
-        $child1 = new NullNode;
+        $array = new ArrayNode([
+            $child1 = new NullNode,
+        ]);
         $child2 = new NullNode;
-
-        $this->assertNull($child1->getNextSibling());
-        $this->assertNull($child2->getNextSibling());
-
-        $array->push($child1);
 
         $this->assertNull($child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
@@ -177,14 +178,22 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * @expectedException \DaveRandom\Jom\Exceptions\EmptySubjectNodeListException
+     */
+    public function testPushNoArgsThrows()
+    {
+        (new ArrayNode)->push();
+    }
+
+    /**
      * @expectedException \DaveRandom\Jom\Exceptions\InvalidSubjectNodeException
      */
     public function testPushExistingChildThrows()
     {
-        $array = new ArrayNode;
-        $child = new NullNode;
+        $array = new ArrayNode([
+            $child = new NullNode,
+        ]);
 
-        $array->push($child);
         $array->push($child);
     }
 
@@ -193,12 +202,10 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushChildOfOtherNodeThrows()
     {
-        $array1 = new ArrayNode;
-        $array2 = new ArrayNode;
-        $child = new NullNode;
+        $array = new ArrayNode;
+        $child = ArrayNode::createFromValue([null])->getFirstChild();
 
-        $array1->push($child);
-        $array2->push($child);
+        $array->push($child);
     }
 
     /**
@@ -207,7 +214,7 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
     public function testPushNodeWithOwnerDocumentInToOrphanedArrayThrows()
     {
         $array = new ArrayNode;
-        $child = new NullNode(Document::createFromValue(null));
+        $child = Document::createFromValue(null)->getRootNode();
 
         $array->push($child);
     }
@@ -241,15 +248,12 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
      */
     public function testPushWithActiveIteratorThrows()
     {
-        $array = new ArrayNode;
-        $child1 = new NullNode;
-        $child2 = new NullNode;
-
-        $array->push($child1);
+        $array = ArrayNode::createFromValue([null]);
+        $child = new NullNode;
 
         /** @noinspection PhpUnusedLocalVariableInspection */
         foreach ($array as $unused) {
-            $array->push($child2);
+            $array->push($child);
         }
     }
 
@@ -418,6 +422,19 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($child2->getNextSibling());
     }
 
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testPopWithActiveIteratorThrows()
+    {
+        $array = ArrayNode::createFromValue([null]);
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->pop();
+        }
+    }
+
     // endregion
 
     // region unshift()
@@ -492,6 +509,23 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($child2, $array[0]);
         $this->assertSame($child1, $array->offsetGet(1));
         $this->assertSame($child1, $array[1]);
+    }
+
+    public function testUnshiftMultipleItemsOrder()
+    {
+        $array = ArrayNode::createFromValue([null]);
+        $child1 = new NullNode;
+        $child2 = new NullNode;
+
+        $array->unshift($child1, $child2);
+
+        $this->assertSame($child1, $array->getFirstChild());
+
+        $this->assertSame($child1, $array[0]);
+        $this->assertSame($child2, $array[1]);
+
+        $this->assertSame(0, $child1->getKey());
+        $this->assertSame(1, $child2->getKey());
     }
 
     public function testUnshiftSetsChildParent()
@@ -572,6 +606,14 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull($child1->getNextSibling());
         $this->assertSame($child1, $child2->getNextSibling());
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\EmptySubjectNodeListException
+     */
+    public function testUnshiftNoArgsThrows()
+    {
+        (new ArrayNode)->unshift();
     }
 
     /**
@@ -814,6 +856,19 @@ class ArrayNodeTest extends \PHPUnit\Framework\TestCase
 
         $this->assertNull($child1->getNextSibling());
         $this->assertNull($child2->getNextSibling());
+    }
+
+    /**
+     * @expectedException \DaveRandom\Jom\Exceptions\WriteOperationForbiddenException
+     */
+    public function testShiftWithActiveIteratorThrows()
+    {
+        $array = ArrayNode::createFromValue([null]);
+
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        foreach ($array as $unused) {
+            $array->shift();
+        }
     }
 
     // endregion
