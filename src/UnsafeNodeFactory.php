@@ -9,7 +9,7 @@ final class UnsafeNodeFactory extends NodeFactory
     /**
      * @throws InvalidNodeValueException
      */
-    private function createVectorNodeFromArray(array $values, ?Document $doc): VectorNode
+    private function createVectorNodeFromArray(array $values, ?Document $doc, int $flags): VectorNode
     {
         $i = 0;
         $packed = true;
@@ -22,24 +22,24 @@ final class UnsafeNodeFactory extends NodeFactory
         }
 
         return $packed
-            ? $this->createArrayNodeFromPackedArray($values, $doc)
-            : $this->createObjectNodeFromPropertyMap($values, $doc);
+            ? $this->createArrayNodeFromPackedArray($values, $doc, $flags)
+            : $this->createObjectNodeFromPropertyMap($values, $doc, $flags);
     }
 
     /**
      * @throws InvalidNodeValueException
      */
-    private function createNodeFromObject(object $object, ?Document $doc): Node
+    private function createNodeFromObject(object $object, ?Document $doc, int $flags): ?Node
     {
         return $object instanceof \JsonSerializable
-            ? $this->createNodeFromValue($object->jsonSerialize(), $doc)
-            : $this->createObjectNodeFromPropertyMap($object, $doc);
+            ? $this->createNodeFromValue($object->jsonSerialize(), $doc, $flags)
+            : $this->createObjectNodeFromPropertyMap($object, $doc, $flags);
     }
 
     /**
      * @inheritdoc
      */
-    public function createNodeFromValue($value, ?Document $doc = null): Node
+    public function createNodeFromValue($value, ?Document $doc, int $flags): ?Node
     {
         try {
             if (null !== $node = $this->createScalarOrNullNodeFromValue($value, $doc)) {
@@ -47,11 +47,15 @@ final class UnsafeNodeFactory extends NodeFactory
             }
 
             if (\is_object($value)) {
-                return $this->createNodeFromObject($value, $doc);
+                return $this->createNodeFromObject($value, $doc, $flags);
             }
 
             if (\is_array($value)) {
-                return $this->createVectorNodeFromArray($value, $doc);
+                return $this->createVectorNodeFromArray($value, $doc, $flags);
+            }
+
+            if ($flags & Node::IGNORE_INVALID_VALUES) {
+                return null;
             }
         } catch (InvalidNodeValueException $e) {
             throw $e;

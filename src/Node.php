@@ -8,6 +8,9 @@ use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
 abstract class Node implements \JsonSerializable
 {
+    public const IGNORE_INVALID_VALUES = 0b01;
+    public const PERMIT_INCORRECT_REFERENCE_TYPE = 0b10;
+
     protected $ownerDocument;
 
     /** @var string|int|null */
@@ -84,15 +87,16 @@ abstract class Node implements \JsonSerializable
      * @throws InvalidNodeValueException
      * @return static
      */
-    public static function createFromValue($value, ?Document $ownerDocument = null): Node
+    public static function createFromValue($value, ?Document $ownerDocument = null, int $flags = 0): Node
     {
         static $nodeFactory;
 
         try {
             $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
-                ->createNodeFromValue($value, $ownerDocument);
+                ->createNodeFromValue($value, $ownerDocument, $flags);
 
-            if (!($result instanceof static)) {
+            // Check that the created node matches the class used to call the method
+            if (!($result instanceof static) && !($flags & self::IGNORE_INVALID_VALUES)) {
                 throw new InvalidNodeValueException(\sprintf(
                     "Value of type %s parsed as %s, %s expected",
                     \gettype($value),

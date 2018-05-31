@@ -16,13 +16,15 @@ abstract class NodeFactory
     /**
      * @throws InvalidNodeValueException
      */
-    final protected function createArrayNodeFromPackedArray(array $values, ?Document $doc): ArrayNode
+    final protected function createArrayNodeFromPackedArray(array $values, ?Document $doc, int $flags): ArrayNode
     {
         try {
             $node = new ArrayNode([], $doc);
 
             foreach ($values as $value) {
-                $node->push($this->createNodeFromValue($value, $doc));
+                if (null !== $valueNode = $this->createNodeFromValue($value, $doc, $flags)) {
+                    $node->push($valueNode);
+                }
             }
 
             return $node;
@@ -38,13 +40,15 @@ abstract class NodeFactory
     /**
      * @throws InvalidNodeValueException
      */
-    final protected function createObjectNodeFromPropertyMap($properties, ?Document $doc): ObjectNode
+    final protected function createObjectNodeFromPropertyMap($properties, ?Document $doc, int $flags): ObjectNode
     {
         try {
             $node = new ObjectNode([], $doc);
 
             foreach ($properties as $name => $value) {
-                $node->setProperty($name, $this->createNodeFromValue($value, $doc));
+                if (null !== $valueNode = $this->createNodeFromValue($value, $doc, $flags)) {
+                    $node->setProperty($name, $valueNode);
+                }
             }
 
             return $node;
@@ -75,5 +79,5 @@ abstract class NodeFactory
     /**
      * @throws InvalidNodeValueException
      */
-    abstract public function createNodeFromValue($value, ?Document $doc = null): Node;
+    abstract public function createNodeFromValue($value, ?Document $doc, int $flags): ?Node;
 }

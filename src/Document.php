@@ -12,6 +12,8 @@ use ExceptionalJSON\DecodeErrorException;
 
 final class Document implements \JsonSerializable
 {
+    public const IGNORE_INVALID_VALUES = Node::IGNORE_INVALID_VALUES;
+
     /** @var Node */
     private $rootNode;
 
@@ -123,7 +125,7 @@ final class Document implements \JsonSerializable
 
             $doc = new self();
             $doc->rootNode = ($nodeFactory ?? $nodeFactory = new SafeNodeFactory)
-                ->createNodeFromValue($data, $doc);
+                ->createNodeFromValue($data, $doc, 0);
 
             return $doc;
         } catch (DecodeErrorException $e) {
@@ -138,11 +140,11 @@ final class Document implements \JsonSerializable
     /**
      * @throws InvalidNodeValueException
      */
-    public static function createFromValue($value): Document
+    public static function createFromValue($value, int $flags = 0): Document
     {
         try {
             $doc = new self();
-            $doc->rootNode = Node::createFromValue($value, $doc);
+            $doc->rootNode = Node::createFromValue($value, $doc, $flags);
 
             return $doc;
         } catch (InvalidNodeValueException $e) {
