@@ -153,7 +153,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
      * @throws InvalidSubjectNodeException
      * @throws InvalidReferenceNodeException
      */
-    protected function insertNode(Node $node, $key, Node $before = null): Node
+    protected function insertNode(Node $node, $key, ?Node $before = null): Node
     {
         // A null $before reference means push the node on to the end of the list
         if ($before === null) {

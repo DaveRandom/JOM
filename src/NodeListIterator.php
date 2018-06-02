@@ -21,7 +21,7 @@ final class NodeListIterator implements \Iterator
     /** @var Node|null */
     private $currentNode;
 
-    public function __construct(?Node $firstNode, callable $activityStateChangeNotifier = null)
+    public function __construct(?Node $firstNode, ?callable $activityStateChangeNotifier = null)
     {
         $this->firstNode = $firstNode;
         $this->activityStateChangeNotifier = $activityStateChangeNotifier;

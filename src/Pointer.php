@@ -64,7 +64,7 @@ final class Pointer
     /**
      * @throws InvalidPointerException
      */
-    public function __construct(array $path, int $relativeLevels = null, bool $isKeyLookup = false)
+    public function __construct(array $path, ?int $relativeLevels = null, ?bool $isKeyLookup = false)
     {
         if ($relativeLevels < 0) {
             throw new InvalidPointerException('Relative levels must be positive');
@@ -76,7 +76,7 @@ final class Pointer
 
         $this->path = $path;
         $this->relativeLevels = $relativeLevels;
-        $this->keyLookup = $isKeyLookup;
+        $this->keyLookup = $isKeyLookup ?? false;
     }
 
     public function getPath(): array

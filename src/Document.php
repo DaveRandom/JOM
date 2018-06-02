@@ -116,12 +116,15 @@ final class Document implements \JsonSerializable
     /**
      * @throws ParseFailureException
      */
-    public static function parse(string $json, int $depthLimit = 512, int $options = 0): Document
+    public static function parse(string $json, ?int $depthLimit = 512, ?int $options = 0): Document
     {
         static $nodeFactory;
 
+        $depthLimit = $depthLimit ?? 512;
+        $options = ($options ?? 0) & ~\JSON_OBJECT_AS_ARRAY;
+
         try {
-            $data = \ExceptionalJSON\decode($json, false, $depthLimit, $options & ~\JSON_OBJECT_AS_ARRAY);
+            $data = \ExceptionalJSON\decode($json, false, $depthLimit, $options);
 
             $doc = new self();
             $doc->rootNode = ($nodeFactory ?? $nodeFactory = new SafeNodeFactory)
@@ -140,7 +143,7 @@ final class Document implements \JsonSerializable
     /**
      * @throws InvalidNodeValueException
      */
-    public static function createFromValue($value, int $flags = 0): Document
+    public static function createFromValue($value, ?int $flags = 0): Document
     {
         try {
             $doc = new self();
@@ -203,7 +206,7 @@ final class Document implements \JsonSerializable
      * @throws PointerReferenceNotFoundException
      * @throws InvalidSubjectNodeException
      */
-    public function evaluatePointer($pointer, Node $base = null)
+    public function evaluatePointer($pointer, ?Node $base = null)
     {
         if (!($pointer instanceof Pointer)) {
             $pointer = Pointer::createFromString((string)$pointer);

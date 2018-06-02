@@ -87,9 +87,11 @@ abstract class Node implements \JsonSerializable
      * @throws InvalidNodeValueException
      * @return static
      */
-    public static function createFromValue($value, ?Document $ownerDocument = null, int $flags = 0): Node
+    public static function createFromValue($value, ?Document $ownerDocument = null, ?int $flags = 0): Node
     {
         static $nodeFactory;
+
+        $flags = $flags ?? 0;
 
         try {
             $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
@@ -180,7 +182,7 @@ abstract class Node implements \JsonSerializable
      * @throws InvalidPointerException
      * @throws InvalidSubjectNodeException
      */
-    final public function getPointer(Node $base = null): Pointer
+    final public function getPointer(?Node $base = null): Pointer
     {
         return $base === null
             ? $this->getAbsolutePointer()
