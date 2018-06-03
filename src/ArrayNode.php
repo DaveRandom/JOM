@@ -28,6 +28,15 @@ final class ArrayNode extends VectorNode
         }
     }
 
+    private function normalizeIndex($index): int
+    {
+        if (!\is_int($index) && !\ctype_digit($index)) {
+            throw new \TypeError('Index must be an integer');
+        }
+
+        return (int)$index;
+    }
+
     /**
      * @throws InvalidSubjectNodeException
      */
@@ -48,6 +57,14 @@ final class ArrayNode extends VectorNode
             throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
         }
         //@codeCoverageIgnoreEnd
+    }
+
+    /**
+     * @throws InvalidKeyException
+     */
+    public function item(int $index): Node
+    {
+        return $this->offsetGet($index);
     }
 
     /**
@@ -198,15 +215,6 @@ final class ArrayNode extends VectorNode
         }
 
         return $this->children[$index];
-    }
-
-    private function normalizeIndex($index): int
-    {
-        if (!\is_int($index) && !\ctype_digit($index)) {
-            throw new \TypeError('Index must be an integer');
-        }
-
-        return (int)$index;
     }
 
     /**
