@@ -35,6 +35,16 @@ final class Pointer
     }
 
     /**
+     * Helper to efficiently ensure path is packed array of strings
+     *
+     * @param string ...$path
+     */
+    private function setPath(string ...$path): void
+    {
+        $this->path = $path;
+    }
+
+    /**
      * @throws InvalidPointerException
      */
     public static function createFromString(string $pointer): self
@@ -74,7 +84,7 @@ final class Pointer
             throw new InvalidPointerException('Key lookups are only valid for relative pointers');
         }
 
-        $this->path = $path;
+        $this->setPath(...$path);
         $this->relativeLevels = $relativeLevels;
         $this->keyLookup = $isKeyLookup ?? false;
     }
