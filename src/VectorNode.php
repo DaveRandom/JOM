@@ -282,6 +282,17 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         return !empty($this->children);
     }
 
+    public function containsChild(Node $child): bool
+    {
+        do {
+            if ($child->parent === $this) {
+                return true;
+            }
+        } while (null !== $child = $child->parent);
+
+        return false;
+    }
+
     final public function getFirstChild(): ?Node
     {
         return $this->firstChild;

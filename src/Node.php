@@ -155,6 +155,11 @@ abstract class Node implements \JsonSerializable
         return false;
     }
 
+    public function containsChild(/** @noinspection PhpUnusedParameterInspection */ Node $child): bool
+    {
+        return false;
+    }
+
     public function getFirstChild(): ?Node
     {
         return null;
