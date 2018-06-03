@@ -3,10 +3,8 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
-use DaveRandom\Jom\Exceptions\InvalidPointerException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 use DaveRandom\Jom\Exceptions\ParseFailureException;
-use DaveRandom\Jom\Exceptions\PointerReferenceNotFoundException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use ExceptionalJSON\DecodeErrorException;
 
@@ -16,51 +14,6 @@ final class Document implements \JsonSerializable
 
     /** @var Node */
     private $rootNode;
-
-    /**
-     * @throws PointerReferenceNotFoundException
-     */
-    private function evaluatePointerPath(Pointer $pointer, Node $current): Node
-    {
-        foreach ($pointer->getPath() as $component) {
-            if (!($current instanceof VectorNode)) {
-                throw new PointerReferenceNotFoundException(
-                    "Pointer '{$pointer}' does not indicate a valid path in the document"
-                );
-            }
-
-            if (!$current->offsetExists($component)) {
-                throw new PointerReferenceNotFoundException("The referenced property or index '{$component}' does not exist");
-            }
-
-            $current = $current->offsetGet($component);
-        }
-
-        return $current;
-    }
-
-    /**
-     * @throws PointerReferenceNotFoundException
-     * @throws InvalidSubjectNodeException
-     */
-    private function evaluateRelativePointer(Pointer $pointer, Node $current): Node
-    {
-        if ($current->getOwnerDocument() !== $this) {
-            throw new InvalidSubjectNodeException('Base node belongs to a different document');
-        }
-
-        for ($i = $pointer->getRelativeLevels(); $i > 0; $i--) {
-            $current = $current->getParent();
-
-            if ($current === null) {
-                throw new PointerReferenceNotFoundException(
-                    "Pointer '{$pointer}' does not indicate a valid path in the document relative to the supplied node"
-                );
-            }
-        }
-
-        return $this->evaluatePointerPath($pointer, $current);
-    }
 
     /**
      * @throws InvalidNodeValueException
@@ -197,30 +150,6 @@ final class Document implements \JsonSerializable
         return $node instanceof VectorNode
             ? $this->importVectorNode($node)
             : $this->importScalarNode($node);
-    }
-
-    /**
-     * @param Pointer|string $pointer
-     * @return Node|int|string
-     * @throws InvalidPointerException
-     * @throws PointerReferenceNotFoundException
-     * @throws InvalidSubjectNodeException
-     */
-    public function evaluatePointer($pointer, ?Node $base = null)
-    {
-        if (!($pointer instanceof Pointer)) {
-            $pointer = Pointer::createFromString((string)$pointer);
-        }
-
-        if (!$pointer->isRelative()) {
-            return $this->evaluatePointerPath($pointer, $this->rootNode);
-        }
-
-        $target = $this->evaluateRelativePointer($pointer, $base ?? $this->rootNode);
-
-        return $pointer->isKeyLookup()
-            ? $target->getKey()
-            : $target;
     }
 
     public function jsonSerialize()
