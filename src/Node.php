@@ -97,8 +97,16 @@ abstract class Node implements \JsonSerializable
             $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
                 ->createNodeFromValue($value, $ownerDocument, $flags);
 
+            // Always throw if root node could not be created
+            if ($result === null) {
+                throw new InvalidNodeValueException(\sprintf(
+                    "Failed to create node from value of type '%s'",
+                    \gettype($value)
+                ));
+            }
+
             // Check that the created node matches the class used to call the method
-            if (!($result instanceof static) && !($flags & self::IGNORE_INVALID_VALUES)) {
+            if (!($result instanceof static) && !($flags & self::PERMIT_INCORRECT_REFERENCE_TYPE)) {
                 throw new InvalidNodeValueException(\sprintf(
                     "Value of type %s parsed as %s, %s expected",
                     \gettype($value),
