@@ -126,15 +126,17 @@ final class PointerEvaluator
      */
     public function __construct($root)
     {
-        if ($root instanceof Node) {
-            $this->root = $root;
-        } else if ($root instanceof Document) {
-            $this->root = $root->getRootNode();
-        } else {
+        if ($root instanceof Document) {
+            $root = $root->getRootNode();
+        }
+
+        if (!($root instanceof Node)) {
             throw new InvalidReferenceNodeException(
                 'Pointer evaluator root node must be instance of ' . Node::class . ' or ' . Document::class
             );
         }
+
+        $this->root = $root;
     }
 
     public function getRootNode(): Node
