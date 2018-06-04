@@ -103,7 +103,7 @@ final class PointerGenerator
     public function generateAbsolutePointer(Node $target): Pointer
     {
         try {
-            $targetPath = self::getNodePath($target);
+            $targetPath = $this->getNodePath($target);
 
             $this->validateAndRemoveNodePathRoots($targetPath);
 
@@ -123,8 +123,8 @@ final class PointerGenerator
      */
     public function generateRelativePointer(Node $target, Node $base): Pointer
     {
-        $targetPath = self::getNodePath($target);
-        $basePath = self::getNodePath($base);
+        $targetPath = $this->getNodePath($target);
+        $basePath = $this->getNodePath($base);
 
         $this->validateAndRemoveNodePathRoots($targetPath, $basePath);
 

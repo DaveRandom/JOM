@@ -254,9 +254,13 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     {
         parent::__clone();
 
+        $originalParent = $this->firstChild !== null
+            ? $this->firstChild->parent
+            : null;
+
         // Get an iterator for the original collection's child nodes
-        $children = $this->firstChild !== null
-            ? $this->firstChild->parent->getIterator()
+        $children = $originalParent !== null
+            ? $originalParent->getIterator()
             : [];
 
         // Reset the child ref properties
