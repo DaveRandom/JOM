@@ -16,7 +16,7 @@ final class PointerEvaluator
      */
     private function getArrayIndexFromPathComponent(Pointer $pointer, ArrayNode $node, string $index, int $level)
     {
-        if (!\ctype_digit($index) || $index[0] === '0') {
+        if (!\ctype_digit($index) || ($index[0] === '0' && $index !== '0')) {
             throw new PointerReferenceNotFoundException(
                 "Array member must be referenced by integer index without leading zero", $pointer, $level
             );
@@ -90,9 +90,7 @@ final class PointerEvaluator
             );
         }
 
-        $levels = $pointer->getRelativeLevels();
-
-        if ($levels > 0 && !$this->root->containsChild($context)) {
+        if ($pointer->getRelativeLevels() > 0 && !$this->root->containsChild($context)) {
             throw new InvalidReferenceNodeException(
                 'Context node for relative pointer evaluation is not a child of the root node'
             );
@@ -105,9 +103,11 @@ final class PointerEvaluator
      */
     private function evaluateRelativePointer(Pointer $pointer, Node $current): Node
     {
-        $this->validateRelativePointerContextNode($pointer, $current);
+        if ($current !== $this->root) {
+            $this->validateRelativePointerContextNode($pointer, $current);
+        }
 
-        for ($i = 0, $levels = $pointer->getRelativeLevels(); $i > $levels; $i++) {
+        for ($i = 0, $levels = $pointer->getRelativeLevels(); $i < $levels; $i++) {
             if (($current ?? $this->root) === $this->root) {
                 throw new PointerReferenceNotFoundException(
                     "Relative pointer prefix overflows context node nesting level {$i}", $pointer
@@ -120,9 +120,26 @@ final class PointerEvaluator
         return $this->evaluatePointerPath($pointer, $current);
     }
 
-    public function __construct(Node $root)
+    /**
+     * @param Node|Document $root
+     * @throws InvalidReferenceNodeException
+     */
+    public function __construct($root)
     {
-        $this->root = $root;
+        if ($root instanceof Node) {
+            $this->root = $root;
+        } else if ($root instanceof Document) {
+            $this->root = $root->getRootNode();
+        } else {
+            throw new InvalidReferenceNodeException(
+                'Pointer evaluator root node must be instance of ' . Node::class . ' or ' . Document::class
+            );
+        }
+    }
+
+    public function getRootNode(): Node
+    {
+        return $this->root;
     }
 
     /**
