@@ -2,12 +2,12 @@
 
 namespace DaveRandom\Jom;
 
-use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
+use DaveRandom\Jom\Exceptions\Exception;
 
 final class UnsafeNodeFactory extends NodeFactory
 {
     /**
-     * @throws InvalidNodeValueException
+     * @throws Exception
      */
     private function createVectorNodeFromArray(array $values, ?Document $doc, int $flags): VectorNode
     {
@@ -27,7 +27,7 @@ final class UnsafeNodeFactory extends NodeFactory
     }
 
     /**
-     * @throws InvalidNodeValueException
+     * @throws Exception
      */
     private function createNodeFromObject(object $object, ?Document $doc, int $flags): ?Node
     {
@@ -39,32 +39,16 @@ final class UnsafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    public function createNodeFromValue($value, ?Document $doc, int $flags): ?Node
+    protected function createVectorNodeFromValue($value, ?Document $doc, int $flags): ?Node
     {
-        try {
-            if (null !== $node = $this->createScalarOrNullNodeFromValue($value, $doc)) {
-                return $node;
-            }
-
-            if (\is_object($value)) {
-                return $this->createNodeFromObject($value, $doc, $flags);
-            }
-
-            if (\is_array($value)) {
-                return $this->createVectorNodeFromArray($value, $doc, $flags);
-            }
-
-            if ($flags & Node::IGNORE_INVALID_VALUES) {
-                return null;
-            }
-        } catch (InvalidNodeValueException $e) {
-            throw $e;
-        //@codeCoverageIgnoreStart
-        } catch (\Exception $e) {
-            throw unexpected($e);
+        if (\is_object($value)) {
+            return $this->createNodeFromObject($value, $doc, $flags);
         }
-        //@codeCoverageIgnoreEnd
 
-        throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");
+        if (\is_array($value)) {
+            return $this->createVectorNodeFromArray($value, $doc, $flags);
+        }
+
+        return null;
     }
 }
