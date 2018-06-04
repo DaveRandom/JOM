@@ -126,7 +126,7 @@ final class Document implements \JsonSerializable
         //@codeCoverageIgnoreEnd
     }
 
-    public function getRootNode(): ?Node
+    public function getRootNode(): Node
     {
         return $this->rootNode;
     }
