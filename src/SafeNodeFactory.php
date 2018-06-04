@@ -31,7 +31,7 @@ final class SafeNodeFactory extends NodeFactory
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
 

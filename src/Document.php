@@ -48,7 +48,7 @@ final class Document implements \JsonSerializable
             return Node::createFromValue($node->getValue(), $this);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
     }
@@ -61,7 +61,7 @@ final class Document implements \JsonSerializable
             $this->rootNode = $this->import($this->rootNode);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
     }
@@ -88,7 +88,7 @@ final class Document implements \JsonSerializable
             throw new ParseFailureException("Decoding JSON string failed: {$e->getMessage()}", $e);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
     }
@@ -107,7 +107,7 @@ final class Document implements \JsonSerializable
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
     }
@@ -121,7 +121,7 @@ final class Document implements \JsonSerializable
             return $doc;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            throw new \Error('Unexpected ' . \get_class($e) . ": {$e->getMessage()}", 0, $e);
+            throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
     }
