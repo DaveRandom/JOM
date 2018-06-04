@@ -6,9 +6,9 @@ use DaveRandom\Jom\Exceptions\InvalidPointerException;
 
 final class Pointer
 {
-    private $path;
-    private $relativeLevels;
-    private $keyLookup;
+    private $path = [];
+    private $relativeLevels = null;
+    private $keyLookup = false;
 
     private $string;
 
@@ -34,47 +34,43 @@ final class Pointer
         return $result;
     }
 
-    /**
-     * Helper to efficiently ensure path is packed array of strings
-     *
-     * @param string ...$path
-     */
-    private function setPath(string ...$path): void
-    {
-        $this->path = $path;
-    }
+    private function __construct() { }
 
     /**
      * @throws InvalidPointerException
      */
     public static function createFromString(string $pointer): self
     {
-        $relativeLevels = null;
+        $result = new self();
 
-        if (\preg_match('/^(0|[1-9][0-9]*)([^0-9].*)$/i', $pointer, $match)) {
-            $relativeLevels = (int)$match[1];
+        if (\preg_match('/^(0|[1-9][0-9]*)($|[^0-9].*)/i', $pointer, $match)) {
+            $result->relativeLevels = (int)$match[1];
             $pointer = $match[2];
 
             if ($pointer === '#') {
-                return new self([], $relativeLevels, true);
+                $result->keyLookup = true;
+                return $result;
             }
         }
 
         if ($pointer === '') {
-            return new self([], $relativeLevels, false);
+            return $result;
         }
 
         if ($pointer[0] !== '/') {
-            throw new InvalidPointerException('JSON pointer must be the empty string begin with /');
+            throw new InvalidPointerException('JSON pointer must be the empty string or begin with /');
         }
 
-        return new self(self::decodePath($pointer), $relativeLevels, false);
+        $result->path = self::decodePath($pointer);
+
+        return $result;
     }
 
     /**
+     * @param string[] $path
      * @throws InvalidPointerException
      */
-    public function __construct(array $path, ?int $relativeLevels = null, ?bool $isKeyLookup = false)
+    public static function createFromParameters(array $path, ?int $relativeLevels = null, ?bool $isKeyLookup = false): self
     {
         if ($relativeLevels < 0) {
             throw new InvalidPointerException('Relative levels must be positive');
@@ -84,9 +80,16 @@ final class Pointer
             throw new InvalidPointerException('Key lookups are only valid for relative pointers');
         }
 
-        $this->setPath(...$path);
-        $this->relativeLevels = $relativeLevels;
-        $this->keyLookup = $isKeyLookup ?? false;
+        $result = new self();
+
+        foreach ($path as $component) {
+            $result->path[] = (string)$component;
+        }
+
+        $result->relativeLevels = $relativeLevels;
+        $result->keyLookup = $isKeyLookup ?? false;
+
+        return $result;
     }
 
     public function getPath(): array
@@ -117,11 +120,11 @@ final class Pointer
 
         $this->string = '';
 
-        if ($this->isRelative()) {
+        if ($this->relativeLevels !== null) {
             $this->string .= $this->relativeLevels;
         }
 
-        $this->string .= $this->isKeyLookup()
+        $this->string .= $this->keyLookup
             ? '#'
             : self::encodePath($this->path);
 
