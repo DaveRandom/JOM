@@ -22,8 +22,8 @@ final class Document implements \JsonSerializable
      */
     private function importVectorNode(VectorNode $node): VectorNode
     {
-        if (!($node instanceof ArrayNode || $node instanceof ObjectNode)) {
-            throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
+        if (!\in_array(\get_class($node), [ArrayNode::class, ObjectNode::class])) {
+            throw new InvalidSubjectNodeException('Source node is of unknown type: ' . \get_class($node));
         }
 
         $newNode = new $node(null, $this);
@@ -40,8 +40,8 @@ final class Document implements \JsonSerializable
      */
     private function importScalarNode(Node $node): Node
     {
-        if (!($node instanceof BooleanNode || $node instanceof NumberNode || $node instanceof StringNode)) {
-            throw new InvalidSubjectNodeException('Source node is of unknown type ' . \get_class($node));
+        if (!\in_array(\get_class($node), [BooleanNode::class, NumberNode::class, StringNode::class])) {
+            throw new InvalidSubjectNodeException('Source node is of unknown type: ' . \get_class($node));
         }
 
         try {
