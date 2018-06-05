@@ -114,7 +114,7 @@ final class ObjectNode extends VectorNode
         $result = new \stdClass;
 
         foreach ($this as $name => $value) {
-            $result->$name = $value->getValue();
+            $result->{$name} = $value->getValue();
         }
 
         return $result;
@@ -124,8 +124,8 @@ final class ObjectNode extends VectorNode
     {
         $result = [];
 
-        foreach ($this as $value) {
-            $result[] = $value instanceof VectorNode
+        foreach ($this as $name => $value) {
+            $result[$name] = $value instanceof VectorNode
                 ? $value->toArray()
                 : $value->getValue();
         }
