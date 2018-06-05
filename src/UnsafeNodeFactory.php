@@ -7,7 +7,7 @@ final class UnsafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    protected function createNodeFromArrayValue(array $array, ?Document $ownerDoc, int $flags): VectorNode
+    protected function createNodeFromArrayValue(?Document $ownerDoc, array $array, int $flags): VectorNode
     {
         $i = 0;
         $packed = true;
@@ -27,7 +27,7 @@ final class UnsafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    protected function createNodeFromObjectValue(object $object, ?Document $ownerDoc, int $flags): ?Node
+    protected function createNodeFromObjectValue(?Document $ownerDoc, object $object, int $flags): ?Node
     {
         return $object instanceof \JsonSerializable
             ? $this->tryCreateNodeFromValue($object->jsonSerialize(), $ownerDoc, $flags)

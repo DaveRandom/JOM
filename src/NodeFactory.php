@@ -23,6 +23,29 @@ abstract class NodeFactory
     }
 
     /**
+     * @uses createNullNode
+     */
+    private function createNullNode(?Document $ownerDoc): NullNode
+    {
+        return new NullNode($ownerDoc);
+    }
+
+    /**
+     * @uses createNodeFromScalarValue
+     */
+    private function createNodeFromScalarValue(?Document $ownerDoc, $value): Node
+    {
+        $className = [
+            'boolean' => BooleanNode::class,
+            'integer' => NumberNode::class,
+            'double' => NumberNode::class,
+            'string' => StringNode::class,
+        ][\gettype($value)];
+
+        return new $className($value, $ownerDoc);
+    }
+
+    /**
      * @throws InvalidNodeValueException
      * @throws Exception
      */
@@ -30,28 +53,18 @@ abstract class NodeFactory
     {
         $type = \gettype($value);
 
-        switch ($type) {
-            case 'NULL': {
-                return new NullNode($ownerDoc);
-            }
+        $factory = [
+            'NULL'    => 'createNullNode',
+            'boolean' => 'createNodeFromScalarValue',
+            'integer' => 'createNodeFromScalarValue',
+            'double'  => 'createNodeFromScalarValue',
+            'string'  => 'createNodeFromScalarValue',
+            'array'   => 'createNodeFromArrayValue',
+            'object'  => 'createNodeFromObjectValue',
+        ][$type] ?? null;
 
-            case 'boolean': case 'integer': case 'double': case 'string': {
-                $className = [
-                    'boolean' => BooleanNode::class,
-                    'integer' => NumberNode::class,
-                    'double' => NumberNode::class,
-                    'string' => StringNode::class,
-                ][$type];
-                return new $className($value, $ownerDoc);
-            }
-
-            case 'array': {
-                return $this->createNodeFromArrayValue($value, $ownerDoc, $flags);
-            }
-
-            case 'object': {
-                $node = $this->createNodeFromObjectValue($value, $ownerDoc, $flags);
-            }
+        if ($factory !== null) {
+            $node = $this->{$factory}($ownerDoc, $value, $flags);
         }
 
         if (isset($node)) {
@@ -103,13 +116,13 @@ abstract class NodeFactory
      * @throws InvalidNodeValueException
      * @throws Exception
      */
-    abstract protected function createNodeFromArrayValue(array $array, ?Document $ownerDoc, int $flags): VectorNode;
+    abstract protected function createNodeFromArrayValue(?Document $ownerDoc, array $array, int $flags): VectorNode;
 
     /**
      * @throws InvalidNodeValueException
      * @throws Exception
      */
-    abstract protected function createNodeFromObjectValue(object $object, ?Document $ownerDoc, int $flags): ?Node;
+    abstract protected function createNodeFromObjectValue(?Document $ownerDoc, object $object, int $flags): ?Node;
 
     /**
      * @throws InvalidNodeValueException

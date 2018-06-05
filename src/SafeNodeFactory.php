@@ -7,7 +7,7 @@ final class SafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    protected function createNodeFromArrayValue(array $array, ?Document $ownerDoc, int $flags): VectorNode
+    protected function createNodeFromArrayValue(?Document $ownerDoc, array $array, int $flags): VectorNode
     {
         return $this->createArrayNodeFromPackedArray($array, $ownerDoc, $flags);
     }
@@ -15,7 +15,7 @@ final class SafeNodeFactory extends NodeFactory
     /**
      * @inheritdoc
      */
-    protected function createNodeFromObjectValue(object $object, ?Document $ownerDoc, int $flags): ?Node
+    protected function createNodeFromObjectValue(?Document $ownerDoc, object $object, int $flags): ?Node
     {
         return $this->createObjectNodeFromPropertyMap($object, $ownerDoc, $flags);
     }
