@@ -14,16 +14,24 @@ final class PointerEvaluator
     /**
      * @throws PointerReferenceNotFoundException
      */
-    private function getArrayIndexFromPathComponent(Pointer $pointer, ArrayNode $node, string $index, int $level)
+    private function getValidArrayIndex(string $index, Pointer $pointer, int $level): int
     {
-        if (!\ctype_digit($index) || ($index[0] === '0' && $index !== '0')) {
-            throw new PointerReferenceNotFoundException(
-                "Array member must be referenced by integer index without leading zero", $pointer, $level
-            );
+        if (\preg_match('/^(?:0|[1-9][0-9]*)$/', $index)) {
+            return (int)$index;
         }
 
+        throw new PointerReferenceNotFoundException(
+            "Array member must be referenced by integer index without leading zero", $pointer, $level
+        );
+    }
+
+    /**
+     * @throws PointerReferenceNotFoundException
+     */
+    private function getArrayIndexFromPathComponent(Pointer $pointer, ArrayNode $node, string $index, int $level)
+    {
         try {
-            return $node->item((int)$index);
+            return $node->item($this->getValidArrayIndex($index, $pointer, $level));
         } catch (InvalidKeyException $e) {
             throw new PointerReferenceNotFoundException(
                 "The referenced index does not exist", $pointer, $level, $e
