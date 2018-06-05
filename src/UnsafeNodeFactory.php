@@ -2,19 +2,17 @@
 
 namespace DaveRandom\Jom;
 
-use DaveRandom\Jom\Exceptions\Exception;
-
 final class UnsafeNodeFactory extends NodeFactory
 {
     /**
-     * @throws Exception
+     * @inheritdoc
      */
-    private function createVectorNodeFromArray(array $values, ?Document $doc, int $flags): VectorNode
+    protected function createNodeFromArrayValue(array $array, ?Document $ownerDoc, int $flags): VectorNode
     {
         $i = 0;
         $packed = true;
 
-        foreach ($values as $key => $value) {
+        foreach ($array as $key => $value) {
             if ($key !== $i++) {
                 $packed = false;
                 break;
@@ -22,33 +20,17 @@ final class UnsafeNodeFactory extends NodeFactory
         }
 
         return $packed
-            ? $this->createArrayNodeFromPackedArray($values, $doc, $flags)
-            : $this->createObjectNodeFromPropertyMap($values, $doc, $flags);
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function createNodeFromObject(object $object, ?Document $doc, int $flags): ?Node
-    {
-        return $object instanceof \JsonSerializable
-            ? $this->createNodeFromValue($object->jsonSerialize(), $doc, $flags)
-            : $this->createObjectNodeFromPropertyMap($object, $doc, $flags);
+            ? $this->createArrayNodeFromPackedArray($array, $ownerDoc, $flags)
+            : $this->createObjectNodeFromPropertyMap($array, $ownerDoc, $flags);
     }
 
     /**
      * @inheritdoc
      */
-    protected function createVectorNodeFromValue($value, ?Document $doc, int $flags): ?Node
+    protected function createNodeFromObjectValue(object $object, ?Document $ownerDoc, int $flags): ?Node
     {
-        if (\is_object($value)) {
-            return $this->createNodeFromObject($value, $doc, $flags);
-        }
-
-        if (\is_array($value)) {
-            return $this->createVectorNodeFromArray($value, $doc, $flags);
-        }
-
-        return null;
+        return $object instanceof \JsonSerializable
+            ? $this->tryCreateNodeFromValue($object->jsonSerialize(), $ownerDoc, $flags)
+            : $this->createObjectNodeFromPropertyMap($object, $ownerDoc, $flags);
     }
 }

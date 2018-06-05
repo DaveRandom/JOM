@@ -7,23 +7,74 @@ use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 
 abstract class NodeFactory
 {
-    private const SCALAR_VALUE_NODE_CLASSES = [
-        'boolean' => BooleanNode::class,
-        'integer' => NumberNode::class,
-        'double' => NumberNode::class,
-        'string' => StringNode::class,
-    ];
+    private const ENABLE_INVALID_VALUE_IGNORE = 0x8000;
+    private const IGNORE_INVALID_VALUES = Node::IGNORE_INVALID_VALUES | self::ENABLE_INVALID_VALUE_IGNORE;
 
     /**
-     * @throws Exception
      * @throws InvalidNodeValueException
      */
-    final protected function createArrayNodeFromPackedArray(array $values, ?Document $doc, int $flags): ArrayNode
+    private function throwInvalidValue($value): void
     {
-        $node = new ArrayNode([], $doc);
+        /** @noinspection PhpInternalEntityUsedInspection */
+        throw new InvalidNodeValueException(\sprintf(
+            "Failed to create node from value of type '%s'",
+            describe($value)
+        ));
+    }
+
+    /**
+     * @throws InvalidNodeValueException
+     * @throws Exception
+     */
+    final protected function tryCreateNodeFromValue($value, ?Document $ownerDoc, int $flags): ?Node
+    {
+        $type = \gettype($value);
+
+        switch ($type) {
+            case 'NULL': {
+                return new NullNode($ownerDoc);
+            }
+
+            case 'boolean': case 'integer': case 'double': case 'string': {
+                $className = [
+                    'boolean' => BooleanNode::class,
+                    'integer' => NumberNode::class,
+                    'double' => NumberNode::class,
+                    'string' => StringNode::class,
+                ][$type];
+                return new $className($value, $ownerDoc);
+            }
+
+            case 'array': {
+                return $this->createNodeFromArrayValue($value, $ownerDoc, $flags);
+            }
+
+            case 'object': {
+                $node = $this->createNodeFromObjectValue($value, $ownerDoc, $flags);
+            }
+        }
+
+        if (isset($node)) {
+            return $node;
+        }
+
+        if (!($flags & Node::IGNORE_INVALID_VALUES)) {
+            $this->throwInvalidValue($value);
+        }
+
+        return null;
+    }
+
+    /**
+     * @throws InvalidNodeValueException
+     * @throws Exception
+     */
+    final protected function createArrayNodeFromPackedArray(array $values, ?Document $ownerDoc, int $flags): ArrayNode
+    {
+        $node = new ArrayNode([], $ownerDoc);
 
         foreach ($values as $value) {
-            if (null !== $valueNode = $this->createNodeFromValue($value, $doc, $flags)) {
+            if (null !== $valueNode = $this->tryCreateNodeFromValue($value, $ownerDoc, $flags)) {
                 $node->push($valueNode);
             }
         }
@@ -32,15 +83,15 @@ abstract class NodeFactory
     }
 
     /**
-     * @throws Exception
      * @throws InvalidNodeValueException
+     * @throws Exception
      */
-    final protected function createObjectNodeFromPropertyMap($properties, ?Document $doc, int $flags): ObjectNode
+    final protected function createObjectNodeFromPropertyMap($properties, ?Document $ownerDoc, int $flags): ObjectNode
     {
-        $node = new ObjectNode([], $doc);
+        $node = new ObjectNode([], $ownerDoc);
 
         foreach ($properties as $name => $value) {
-            if (null !== $valueNode = $this->createNodeFromValue($value, $doc, $flags)) {
+            if (null !== $valueNode = $this->tryCreateNodeFromValue($value, $ownerDoc, $flags)) {
                 $node->setProperty($name, $valueNode);
             }
         }
@@ -48,47 +99,30 @@ abstract class NodeFactory
         return $node;
     }
 
-    final protected function createScalarOrNullNodeFromValue($value, ?Document $doc): ?Node
-    {
-        if ($value === null) {
-            return new NullNode($doc);
-        }
-
-        $className = self::SCALAR_VALUE_NODE_CLASSES[\gettype($value)] ?? null;
-
-        if ($className !== null) {
-            return new $className($value, $doc);
-        }
-
-        return null;
-    }
-
     /**
+     * @throws InvalidNodeValueException
      * @throws Exception
-     * @throws InvalidNodeValueException
      */
-    abstract protected function createVectorNodeFromValue($value, ?Document $doc, int $flags): ?Node;
+    abstract protected function createNodeFromArrayValue(array $array, ?Document $ownerDoc, int $flags): VectorNode;
 
     /**
      * @throws InvalidNodeValueException
+     * @throws Exception
      */
-    final public function createNodeFromValue($value, ?Document $doc, int $flags): ?Node
+    abstract protected function createNodeFromObjectValue(object $object, ?Document $ownerDoc, int $flags): ?Node;
+
+    /**
+     * @throws InvalidNodeValueException
+     * @throws Exception
+     */
+    final public function createNodeFromValue($value, ?Document $ownerDoc, int $flags): Node
     {
-        try {
-            $node = $this->createScalarOrNullNodeFromValue($value, $doc)
-                ?? $this->createVectorNodeFromValue($value, $doc, $flags);
+        $node = $this->tryCreateNodeFromValue($value, $ownerDoc, $flags);
 
-            if ($node !== null || ($flags & Node::IGNORE_INVALID_VALUES)) {
-                return $node;
-            }
-        } catch (InvalidNodeValueException $e) {
-            throw $e;
-        //@codeCoverageIgnoreStart
-        } catch (\Exception $e) {
-            throw unexpected($e);
+        if ($node === null) {
+            $this->throwInvalidValue($value);
         }
-        //@codeCoverageIgnoreEnd
 
-        throw new InvalidNodeValueException("Failed to create node from value of type '" . \gettype($value) . "'");
+        return $node;
     }
 }

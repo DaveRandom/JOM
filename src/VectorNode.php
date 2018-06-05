@@ -275,6 +275,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
                 $this->appendNode(clone $child, $key);
             //@codeCoverageIgnoreStart
             } catch (\Exception $e) {
+                /** @noinspection PhpInternalEntityUsedInspection */
                 throw unexpected($e);
             }
             //@codeCoverageIgnoreEnd
@@ -315,6 +316,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
             }
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd

@@ -54,6 +54,7 @@ final class ArrayNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -100,6 +101,7 @@ final class ArrayNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -130,6 +132,7 @@ final class ArrayNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -152,6 +155,7 @@ final class ArrayNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -245,6 +249,7 @@ final class ArrayNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
+            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
