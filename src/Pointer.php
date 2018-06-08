@@ -36,6 +36,13 @@ final class Pointer
 
     private function __construct() { }
 
+    private static function splitRelativePointerComponents(string $pointer): array
+    {
+        return \preg_match('/^(0|[1-9][0-9]*)($|[^0-9].*)/i', $pointer, $match)
+            ? [$match[2], (int)$match[1]]
+            : [$pointer, null];
+    }
+
     /**
      * @throws InvalidPointerException
      */
@@ -43,17 +50,11 @@ final class Pointer
     {
         $result = new self();
 
-        if (\preg_match('/^(0|[1-9][0-9]*)($|[^0-9].*)/i', $pointer, $match)) {
-            $result->relativeLevels = (int)$match[1];
-            $pointer = $match[2];
+        [$pointer, $result->relativeLevels] = self::splitRelativePointerComponents($pointer);
 
-            if ($pointer === '#') {
-                $result->keyLookup = true;
-                return $result;
-            }
-        }
+        $result->keyLookup = $pointer === '#';
 
-        if ($pointer === '') {
+        if ($result->keyLookup || $pointer === '') {
             return $result;
         }
 
