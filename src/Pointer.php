@@ -17,7 +17,11 @@ final class Pointer
      */
     private static function decodePath(string $path): array
     {
-        if ($path !== '' && $path[0] !== '/') {
+        if ($path === '') {
+            return [];
+        }
+
+        if ($path[0] !== '/') {
             throw new InvalidPointerException('JSON pointer path must be the empty string or begin with /');
         }
 
