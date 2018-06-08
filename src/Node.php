@@ -25,6 +25,24 @@ abstract class Node implements \JsonSerializable
 
     /**
      * @throws InvalidNodeValueException
+     */
+    private static function validateCreatedNodeType(Node $node, string $expectedType, $value): void
+    {
+        if ($node instanceof $expectedType) {
+            return;
+        }
+
+        /** @noinspection PhpInternalEntityUsedInspection */
+        throw new InvalidNodeValueException(\sprintf(
+            "Value of type %s parsed as instance of %s, instance of %s expected",
+            describe($value),
+            \get_class($node),
+            $expectedType
+        ));
+    }
+
+    /**
+     * @throws InvalidNodeValueException
      * @return static
      */
     public static function createFromValue($value, ?Document $ownerDocument = null, ?int $flags = 0): Node
@@ -45,15 +63,8 @@ abstract class Node implements \JsonSerializable
         }
         //@codeCoverageIgnoreEnd
 
-        // Check that the created node matches the class used to call the method
-        if (!($result instanceof static) && !($flags & self::PERMIT_INCORRECT_REFERENCE_TYPE)) {
-            /** @noinspection PhpInternalEntityUsedInspection */
-            throw new InvalidNodeValueException(\sprintf(
-                "Value of type %s parsed as instance of %s, instance of %s expected",
-                describe($value),
-                \get_class($result),
-                static::class
-            ));
+        if (!($flags & self::PERMIT_INCORRECT_REFERENCE_TYPE)) {
+            self::validateCreatedNodeType($result, static::class, $value);
         }
 
         return $result;
