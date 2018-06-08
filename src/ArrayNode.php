@@ -37,10 +37,26 @@ final class ArrayNode extends VectorNode
         return (int)$index;
     }
 
-    private function indexIsNextNewElement($index): bool
+    /**
+     * @throws EmptySubjectNodeListException
+     * @throws InvalidKeyException
+     * @throws InvalidReferenceNodeException
+     * @throws InvalidSubjectNodeException
+     * @throws WriteOperationForbiddenException
+     */
+    private function setNodeAtIndex($index, Node $node): void
     {
-        return $index === null
-            || $this->normalizeIndex($index) === \count($this->children);
+        if ($index === null || $this->normalizeIndex($index) === \count($this->children)) {
+            $this->push($node);
+            return;
+        }
+
+        if (isset($this->children[$index])) {
+            $this->replaceNode($node, $this->children[$index]);
+            return;
+        }
+
+        throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
     }
 
     /**
@@ -243,16 +259,8 @@ final class ArrayNode extends VectorNode
     public function offsetSet($index, $value): void
     {
         try {
-            if ($this->indexIsNextNewElement($index)) {
-                $this->push($value);
-                return;
-            }
-
-            if (isset($this->children[$index])) {
-                $this->replaceNode($value, $this->children[$index]);
-                return;
-            }
-        } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
+            $this->setNodeAtIndex($index, $value);
+        } catch (WriteOperationForbiddenException | InvalidSubjectNodeException | InvalidKeyException $e) {
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
@@ -260,8 +268,6 @@ final class ArrayNode extends VectorNode
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
-
-        throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
     }
 
     public function getValue(): array
