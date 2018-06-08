@@ -12,8 +12,15 @@ final class Pointer
 
     private $string;
 
+    /**
+     * @throws InvalidPointerException
+     */
     private static function decodePath(string $path): array
     {
+        if ($path !== '' && $path[0] !== '/') {
+            throw new InvalidPointerException('JSON pointer path must be the empty string or begin with /');
+        }
+
         $result = [];
 
         foreach (\explode('/', \substr($path, 1)) as $component) {
@@ -34,14 +41,14 @@ final class Pointer
         return $result;
     }
 
-    private function __construct() { }
-
     private static function splitRelativePointerComponents(string $pointer): array
     {
         return \preg_match('/^(0|[1-9][0-9]*)($|[^0-9].*)/i', $pointer, $match)
             ? [$match[2], (int)$match[1]]
             : [$pointer, null];
     }
+
+    private function __construct() { }
 
     /**
      * @throws InvalidPointerException
@@ -50,19 +57,13 @@ final class Pointer
     {
         $result = new self();
 
-        [$pointer, $result->relativeLevels] = self::splitRelativePointerComponents($pointer);
+        [$path, $result->relativeLevels] = self::splitRelativePointerComponents($pointer);
 
-        $result->keyLookup = $pointer === '#';
+        $result->keyLookup = $result->relativeLevels !== null && $path === '#';
 
-        if ($result->keyLookup || $pointer === '') {
-            return $result;
+        if (!$result->keyLookup) {
+            $result->path = self::decodePath($path);
         }
-
-        if ($pointer[0] !== '/') {
-            throw new InvalidPointerException('JSON pointer must be the empty string or begin with /');
-        }
-
-        $result->path = self::decodePath($pointer);
 
         return $result;
     }
