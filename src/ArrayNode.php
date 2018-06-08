@@ -38,6 +38,16 @@ final class ArrayNode extends VectorNode
     }
 
     /**
+     * @throws EmptySubjectNodeListException
+     */
+    private function assertNodeListNotEmpty(array $nodes): void
+    {
+        if (empty($nodes)) {
+            throw new EmptySubjectNodeListException("List of nodes to add must contain at least one node");
+        }
+    }
+
+    /**
      * @throws InvalidSubjectNodeException
      */
     public function __construct(?array $children = [], ?Document $ownerDocument = null)
@@ -75,9 +85,7 @@ final class ArrayNode extends VectorNode
      */
     public function push(Node ...$nodes): void
     {
-        if (empty($nodes)) {
-            throw new EmptySubjectNodeListException("List of nodes to push must contain at least one node");
-        }
+        $this->assertNodeListNotEmpty($nodes);
 
         foreach ($nodes as $node) {
             $this->appendNode($node, \count($this->children));
@@ -116,9 +124,7 @@ final class ArrayNode extends VectorNode
      */
     public function unshift(Node ...$nodes): void
     {
-        if (empty($nodes)) {
-            throw new EmptySubjectNodeListException("List of nodes to unshift must contain at least one node");
-        }
+        $this->assertNodeListNotEmpty($nodes);
 
         try {
             $beforeNode = $this->firstChild;
