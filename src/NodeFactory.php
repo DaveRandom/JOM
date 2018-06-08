@@ -10,6 +10,16 @@ abstract class NodeFactory
     private const ENABLE_INVALID_VALUE_IGNORE = 0x8000;
     private const IGNORE_INVALID_VALUES = Node::IGNORE_INVALID_VALUES | self::ENABLE_INVALID_VALUE_IGNORE;
 
+    private const NODE_FACTORY_METHODS = [
+        'NULL'    => 'createNullNode',
+        'boolean' => 'createNodeFromScalarValue',
+        'integer' => 'createNodeFromScalarValue',
+        'double'  => 'createNodeFromScalarValue',
+        'string'  => 'createNodeFromScalarValue',
+        'array'   => 'createNodeFromArrayValue',
+        'object'  => 'createNodeFromObjectValue',
+    ];
+
     /**
      * @throws InvalidNodeValueException
      */
@@ -51,17 +61,7 @@ abstract class NodeFactory
      */
     final protected function tryCreateNodeFromValue($value, ?Document $ownerDoc, int $flags): ?Node
     {
-        $type = \gettype($value);
-
-        $factory = [
-            'NULL'    => 'createNullNode',
-            'boolean' => 'createNodeFromScalarValue',
-            'integer' => 'createNodeFromScalarValue',
-            'double'  => 'createNodeFromScalarValue',
-            'string'  => 'createNodeFromScalarValue',
-            'array'   => 'createNodeFromArrayValue',
-            'object'  => 'createNodeFromObjectValue',
-        ][$type] ?? null;
+        $factory = self::NODE_FACTORY_METHODS[\gettype($value)] ?? null;
 
         if ($factory !== null) {
             $node = $this->{$factory}($ownerDoc, $value, $flags);
