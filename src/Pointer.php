@@ -48,6 +48,20 @@ final class Pointer
             : [$pointer, null];
     }
 
+    /**
+     * @throws InvalidPointerException
+     */
+    private static function validateRelativePointerParams(?int $relativeLevels, ?bool $isKeyLookup): void
+    {
+        if ($relativeLevels < 0) {
+            throw new InvalidPointerException('Relative levels must be positive');
+        }
+
+        if ($isKeyLookup && $relativeLevels === null) {
+            throw new InvalidPointerException('Key lookups are only valid for relative pointers');
+        }
+    }
+
     private function __construct() { }
 
     /**
@@ -74,22 +88,16 @@ final class Pointer
      */
     public static function createFromParameters(array $path, ?int $relativeLevels = null, ?bool $isKeyLookup = false): self
     {
-        if ($relativeLevels < 0) {
-            throw new InvalidPointerException('Relative levels must be positive');
-        }
-
-        if ($isKeyLookup && $relativeLevels === null) {
-            throw new InvalidPointerException('Key lookups are only valid for relative pointers');
-        }
+        self::validateRelativePointerParams($relativeLevels, $isKeyLookup);
 
         $result = new self();
+
+        $result->relativeLevels = $relativeLevels;
+        $result->keyLookup = $isKeyLookup ?? false;
 
         foreach ($path as $component) {
             $result->path[] = (string)$component;
         }
-
-        $result->relativeLevels = $relativeLevels;
-        $result->keyLookup = $isKeyLookup ?? false;
 
         return $result;
     }
