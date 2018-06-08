@@ -102,6 +102,28 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
         }
     }
 
+    private function resetChildReferenceProperties(): void
+    {
+        $this->firstChild = null;
+        $this->lastChild = null;
+        $this->children = [];
+        $this->activeIteratorCount = 0;
+    }
+
+    private function appendClonedChildNodes(array $nodes): void
+    {
+        foreach ($nodes as $key => $node) {
+            try {
+                $this->appendNode(clone $node, $key);
+                //@codeCoverageIgnoreStart
+            } catch (\Exception $e) {
+                /** @noinspection PhpInternalEntityUsedInspection */
+                throw unexpected($e);
+            }
+            //@codeCoverageIgnoreEnd
+        }
+    }
+
     /**
      * @throws InvalidKeyException
      */
@@ -263,23 +285,8 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
             ? $originalParent->getIterator()
             : [];
 
-        // Reset the child ref properties
-        $this->firstChild = null;
-        $this->lastChild = null;
-        $this->children = [];
-        $this->activeIteratorCount = 0;
-
-        // Loop the original child nodes and append clones of them
-        foreach ($children as $key => $child) {
-            try {
-                $this->appendNode(clone $child, $key);
-            //@codeCoverageIgnoreStart
-            } catch (\Exception $e) {
-                /** @noinspection PhpInternalEntityUsedInspection */
-                throw unexpected($e);
-            }
-            //@codeCoverageIgnoreEnd
-        }
+        $this->resetChildReferenceProperties();
+        $this->appendClonedChildNodes($children);
     }
 
     final public function hasChildren(): bool
