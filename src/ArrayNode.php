@@ -37,6 +37,12 @@ final class ArrayNode extends VectorNode
         return (int)$index;
     }
 
+    private function indexIsNextNewElement($index): bool
+    {
+        return $index === null
+            || $this->normalizeIndex($index) === \count($this->children);
+    }
+
     /**
      * @throws EmptySubjectNodeListException
      */
@@ -220,6 +226,8 @@ final class ArrayNode extends VectorNode
      */
     public function offsetGet($index): Node
     {
+        $index = $this->normalizeIndex($index);
+
         if (!isset($this->children[$index])) {
             throw new InvalidKeyException("Index '{$index}' is outside the bounds of the array");
         }
@@ -235,20 +243,13 @@ final class ArrayNode extends VectorNode
     public function offsetSet($index, $value): void
     {
         try {
-            if ($index === null) {
+            if ($this->indexIsNextNewElement($index)) {
                 $this->push($value);
                 return;
             }
-
-            $index = $this->normalizeIndex($index);
 
             if (isset($this->children[$index])) {
                 $this->replaceNode($value, $this->children[$index]);
-                return;
-            }
-
-            if (isset($this->children[$index - 1])) {
-                $this->push($value);
                 return;
             }
         } catch (WriteOperationForbiddenException | InvalidSubjectNodeException $e) {
