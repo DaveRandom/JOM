@@ -9,6 +9,13 @@ use DaveRandom\Jom\Exceptions\PointerReferenceNotFoundException;
 
 final class PointerEvaluator
 {
+    private const NODE_TYPE_NAMES  = [
+        BooleanNode::class => 'boolean',
+        NumberNode::class => 'number',
+        StringNode::class => 'string',
+        NullNode::class => 'null',
+    ];
+
     private $root;
 
     /**
@@ -58,13 +65,6 @@ final class PointerEvaluator
      */
     private function evaluatePointerPath(Pointer $pointer, Node $current): Node
     {
-        static $nodeTypeNames = [
-            BooleanNode::class => 'boolean',
-            NumberNode::class => 'number',
-            StringNode::class => 'string',
-            NullNode::class => 'null',
-        ];
-
         foreach ($pointer->getPath() as $level => $component) {
             if ($current instanceof ObjectNode) {
                 $current = $this->getObjectPropertyFromPathComponent($pointer, $current, $component, $level);
@@ -76,10 +76,10 @@ final class PointerEvaluator
                 continue;
             }
 
-            $type = $nodeTypeNames[\get_class($current)] ?? 'unknown type';
+            $typeName = self::NODE_TYPE_NAMES[\get_class($current)] ?? 'unknown type';
 
             throw new PointerReferenceNotFoundException(
-                "Expecting object or array, got {$type}", $pointer, $level
+                "Expecting object or array, got {$typeName}", $pointer, $level
             );
         }
 
