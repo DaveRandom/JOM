@@ -26,10 +26,10 @@ abstract class Node implements \JsonSerializable
     /**
      * @throws InvalidNodeValueException
      */
-    private static function validateCreatedNodeType(Node $node, string $expectedType, $value): void
+    private static function validateCreatedNodeType(Node $node, string $expectedType, $value, ?int $flags): Node
     {
-        if ($node instanceof $expectedType) {
-            return;
+        if ($node instanceof $expectedType || ($flags & self::PERMIT_INCORRECT_REFERENCE_TYPE)) {
+            return $node;
         }
 
         /** @noinspection PhpInternalEntityUsedInspection */
@@ -49,11 +49,9 @@ abstract class Node implements \JsonSerializable
     {
         static $nodeFactory;
 
-        $flags = $flags ?? 0;
-
         try {
             $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
-                ->createNodeFromValue($value, $ownerDocument, $flags);
+                ->createNodeFromValue($value, $ownerDocument, $flags ?? 0);
         } catch (InvalidNodeValueException $e) {
             throw $e;
         //@codeCoverageIgnoreStart
@@ -63,11 +61,7 @@ abstract class Node implements \JsonSerializable
         }
         //@codeCoverageIgnoreEnd
 
-        if (!($flags & self::PERMIT_INCORRECT_REFERENCE_TYPE)) {
-            self::validateCreatedNodeType($result, static::class, $value);
-        }
-
-        return $result;
+        return self::validateCreatedNodeType($result, static::class, $value, $flags);
     }
 
     protected function __construct(?Document $ownerDocument)
