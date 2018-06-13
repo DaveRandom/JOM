@@ -25,23 +25,6 @@ final class PointerGenerator
     private $ownerDocument;
 
     /**
-     * Create an array of the node's path to root in reverse order, including the root node
-     *
-     * @return Node[]
-     */
-    private function getNodePath(Node $node): array
-    {
-        $path = [];
-
-        do {
-            $path[] = $node;
-            $node = $node->getParent();
-        } while ($node !== $this->rootParent && $node !== null);
-
-        return $path;
-    }
-
-    /**
      * @param Node[] $nodePath
      * @return string[]
      */
@@ -103,7 +86,7 @@ final class PointerGenerator
     public function generateAbsolutePointer(Node $target): Pointer
     {
         try {
-            $targetPath = $this->getNodePath($target);
+            $targetPath = $target->getAncestors($this->root);
 
             $this->validateAndRemoveNodePathRoots($targetPath);
 
@@ -124,8 +107,8 @@ final class PointerGenerator
      */
     public function generateRelativePointer(Node $target, Node $base): Pointer
     {
-        $targetPath = $this->getNodePath($target);
-        $basePath = $this->getNodePath($base);
+        $targetPath = $target->getAncestors($this->root);
+        $basePath = $base->getAncestors($this->root);
 
         $this->validateAndRemoveNodePathRoots($targetPath, $basePath);
 

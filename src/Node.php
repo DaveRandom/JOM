@@ -3,6 +3,7 @@
 namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
+use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 
 abstract class Node implements \JsonSerializable
 {
@@ -128,6 +129,30 @@ abstract class Node implements \JsonSerializable
     final public function getKey()
     {
         return $this->key;
+    }
+
+    /**
+     * @return Node[]
+     * @throws InvalidReferenceNodeException
+     */
+    final public function getAncestors(?Node $root = null): array
+    {
+        $path = [$this];
+        $current = $this->parent;
+        $rootParent = $root !== null
+            ? $root->parent
+            : null;
+
+        while ($current !== $rootParent && $current !== null) {
+            $path[] = $current;
+            $current = $current->parent;
+        }
+
+        if ($current !== $rootParent) {
+            throw new InvalidReferenceNodeException('Path target node is not an ancestor of the subject node');
+        }
+
+        return $path;
     }
 
     abstract public function getValue();
