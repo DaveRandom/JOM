@@ -21,6 +21,7 @@ abstract class NodeFactory
     ];
 
     /**
+     * @param mixed $value
      * @throws InvalidNodeValueException
      */
     private function throwInvalidValue($value): void
@@ -41,6 +42,7 @@ abstract class NodeFactory
     }
 
     /**
+     * @param mixed $value
      * @uses createNodeFromScalarValue
      */
     private function createNodeFromScalarValue(?Document $ownerDoc, $value): Node
@@ -56,6 +58,7 @@ abstract class NodeFactory
     }
 
     /**
+     * @param mixed $value
      * @throws InvalidNodeValueException
      * @throws Exception
      */
@@ -79,6 +82,7 @@ abstract class NodeFactory
     }
 
     /**
+     * @param mixed[] $values
      * @throws InvalidNodeValueException
      * @throws Exception
      */
@@ -96,6 +100,7 @@ abstract class NodeFactory
     }
 
     /**
+     * @param array|object $properties
      * @throws InvalidNodeValueException
      * @throws Exception
      */
@@ -113,6 +118,7 @@ abstract class NodeFactory
     }
 
     /**
+     * @param mixed[] $array
      * @throws InvalidNodeValueException
      * @throws Exception
      */
@@ -125,6 +131,7 @@ abstract class NodeFactory
     abstract protected function createNodeFromObjectValue(?Document $ownerDoc, object $object, int $flags): ?Node;
 
     /**
+     * @param bool|int|float|string|array|object|null A value that can be encoded as JSON
      * @throws InvalidNodeValueException
      * @throws Exception
      */

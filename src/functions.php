@@ -14,6 +14,8 @@ function unexpected(\Exception $e): \Error
 }
 
 /**
+ * @param mixed $value The value to describe
+ * @return string The class name if the value is an object, otherwise the type name
  * @internal
  */
 function describe($value): string

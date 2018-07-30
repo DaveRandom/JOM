@@ -40,6 +40,8 @@ final class PointerGenerator
     }
 
     /**
+     * @param Node[] $targetPath
+     * @param Node[]|null $basePath
      * @throws InvalidSubjectNodeException
      * @throws InvalidReferenceNodeException
      */

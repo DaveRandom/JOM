@@ -89,6 +89,8 @@ final class ObjectNode extends VectorNode
     }
 
     /**
+     * @param string $propertyName
+     * @return Node
      * @throws InvalidKeyException
      */
     public function offsetGet($propertyName): Node
@@ -97,6 +99,8 @@ final class ObjectNode extends VectorNode
     }
 
     /**
+     * @param string $propertyName
+     * @param Node $value
      * @throws InvalidSubjectNodeException
      * @throws WriteOperationForbiddenException
      */

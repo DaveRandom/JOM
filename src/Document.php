@@ -97,6 +97,7 @@ final class Document implements \JsonSerializable
     }
 
     /**
+     * @param bool|int|float|string|array|object|null A value that can be encoded as JSON
      * @throws InvalidNodeValueException
      */
     public static function createFromValue($value, ?int $flags = 0): Document

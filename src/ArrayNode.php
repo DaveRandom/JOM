@@ -38,6 +38,7 @@ final class ArrayNode extends VectorNode
     }
 
     /**
+     * @param int|string|null Array index or null to push new element
      * @throws EmptySubjectNodeListException
      * @throws InvalidKeyException
      * @throws InvalidReferenceNodeException
@@ -60,6 +61,7 @@ final class ArrayNode extends VectorNode
     }
 
     /**
+     * @param Node[] $nodes
      * @throws EmptySubjectNodeListException
      */
     private function assertNodeListNotEmpty(array $nodes): void
@@ -238,6 +240,7 @@ final class ArrayNode extends VectorNode
     }
 
     /**
+     * @param int|string $index
      * @throws InvalidKeyException
      */
     public function offsetGet($index): Node
@@ -252,6 +255,8 @@ final class ArrayNode extends VectorNode
     }
 
     /**
+     * @param int|string $index
+     * @param Node $value
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      * @throws InvalidKeyException

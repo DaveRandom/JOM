@@ -125,6 +125,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
+     * @param Node|string|int $nodeOrKey
      * @throws InvalidKeyException
      */
     protected function resolveNode($nodeOrKey): Node
@@ -141,6 +142,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
+     * @param string|int $key
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      */
@@ -171,6 +173,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
+     * @param string|int $key
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      * @throws InvalidReferenceNodeException
@@ -353,6 +356,7 @@ abstract class VectorNode extends Node implements \Countable, \IteratorAggregate
     }
 
     /**
+     * @param string|int $key
      * @throws WriteOperationForbiddenException
      * @throws InvalidSubjectNodeException
      */

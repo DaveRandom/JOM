@@ -25,6 +25,7 @@ abstract class Node implements \JsonSerializable
     protected $nextSibling;
 
     /**
+     * @param mixed $value
      * @throws InvalidNodeValueException
      */
     private static function validateCreatedNodeType(Node $node, string $expectedType, $value, ?int $flags): Node
@@ -43,6 +44,7 @@ abstract class Node implements \JsonSerializable
     }
 
     /**
+     * @param bool|int|float|string|array|object|null A value that can be encoded as JSON
      * @throws InvalidNodeValueException
      * @return static
      */
