@@ -8,8 +8,10 @@ use DaveRandom\Jom\Exceptions\ParseFailureException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use ExceptionalJSON\DecodeErrorException;
 
-final class Document implements \JsonSerializable
+final class Document implements \JsonSerializable, Taggable
 {
+    use TagData;
+
     public const IGNORE_INVALID_VALUES = Node::IGNORE_INVALID_VALUES;
 
     /** @var Node */

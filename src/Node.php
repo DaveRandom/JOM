@@ -5,8 +5,10 @@ namespace DaveRandom\Jom;
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 
-abstract class Node implements \JsonSerializable
+abstract class Node implements \JsonSerializable, Taggable
 {
+    use TagData;
+
     public const IGNORE_INVALID_VALUES = 0b01;
     public const PERMIT_INCORRECT_REFERENCE_TYPE = 0b10;
 
