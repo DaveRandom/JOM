@@ -5,8 +5,6 @@ namespace DaveRandom\Jom;
 use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 use DaveRandom\Jom\Exceptions\InvalidSubjectNodeException;
 
-/** @noinspection PhpInconsistentReturnPointsInspection */
-
 final class PointerGenerator
 {
     /**
@@ -97,7 +95,6 @@ final class PointerGenerator
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -123,7 +120,6 @@ final class PointerGenerator
             return Pointer::createFromParameters($this->nodePathToPointerPath($targetPath), \count($basePath));
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd

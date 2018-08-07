@@ -24,3 +24,14 @@ function describe($value): string
         ? \get_class($value)
         : \gettype($value);
 }
+
+/**
+ * Invoke the private static __init() method for a class
+ * @internal
+ */
+function initialize(string $class): void
+{
+    \Closure::bind(function($target) {
+        $target();
+    }, null, $class)([$class, '__init']);
+}

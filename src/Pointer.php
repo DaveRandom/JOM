@@ -4,8 +4,13 @@ namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidPointerException;
 
+\DaveRandom\Jom\initialize(Pointer::class);
+
 final class Pointer
 {
+    /** @var Pointer */
+    private static $emptyPointer;
+
     /** @var string[] */
     private $path = [];
 
@@ -17,6 +22,12 @@ final class Pointer
 
     /** @var string */
     private $string;
+
+    /** @uses __init() */
+    private static function __init(): void
+    {
+        self::$emptyPointer = new self();
+    }
 
     /**
      * @throws InvalidPointerException
@@ -106,11 +117,22 @@ final class Pointer
         return $result;
     }
 
+    private function __construct() { }
+
+    public static function empty(): Pointer
+    {
+        return self::$emptyPointer;
+    }
+
     /**
      * @throws InvalidPointerException
      */
     public static function createFromString(string $pointer): Pointer
     {
+        if ($pointer === '') {
+            return self::$emptyPointer;
+        }
+
         $result = new self();
 
         [$path, $result->relativeLevels] = self::splitRelativePointerComponents($pointer);
@@ -124,14 +146,16 @@ final class Pointer
         return $result;
     }
 
-    private function __construct() { }
-
     /**
      * @param string[] $path
      * @throws InvalidPointerException
      */
     public static function createFromParameters(array $path, ?int $relativeLevels = null, ?bool $isKeyLookup = false): Pointer
     {
+        if ($path === [] && $relativeLevels === null && !$isKeyLookup) {
+            return self::$emptyPointer;
+        }
+
         self::validatePointerComponents($path, $relativeLevels, $isKeyLookup);
 
         $result = new self();

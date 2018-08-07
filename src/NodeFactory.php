@@ -26,7 +26,6 @@ abstract class NodeFactory
      */
     private function throwInvalidValue($value): void
     {
-        /** @noinspection PhpInternalEntityUsedInspection */
         throw new InvalidNodeValueException(\sprintf(
             "Failed to create node from value of type '%s'",
             describe($value)

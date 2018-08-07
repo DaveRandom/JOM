@@ -8,14 +8,25 @@ use DaveRandom\Jom\Exceptions\ParseFailureException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use ExceptionalJSON\DecodeErrorException;
 
+\DaveRandom\Jom\initialize(Document::class);
+
 final class Document implements \JsonSerializable, Taggable
 {
     use TagData;
 
     public const IGNORE_INVALID_VALUES = Node::IGNORE_INVALID_VALUES;
 
+    /** @var NodeFactory */
+    private static $nodeFactory;
+
     /** @var Node */
     private $rootNode;
+
+    /** @uses __init() */
+    private static function __init(): void
+    {
+        self::$nodeFactory = new SafeNodeFactory();
+    }
 
     /**
      * @throws InvalidNodeValueException
@@ -50,7 +61,6 @@ final class Document implements \JsonSerializable, Taggable
             return Node::createFromValue($node->getValue(), $this);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -64,7 +74,6 @@ final class Document implements \JsonSerializable, Taggable
             $this->rootNode = $this->import($this->rootNode);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -75,8 +84,6 @@ final class Document implements \JsonSerializable, Taggable
      */
     public static function parse(string $json, ?int $depthLimit = 512, ?int $options = 0): Document
     {
-        static $nodeFactory;
-
         $depthLimit = $depthLimit ?? 512;
         $options = ($options ?? 0) & ~\JSON_OBJECT_AS_ARRAY;
 
@@ -84,15 +91,13 @@ final class Document implements \JsonSerializable, Taggable
             $data = \ExceptionalJSON\decode($json, false, $depthLimit, $options);
 
             $doc = new self();
-            $doc->rootNode = ($nodeFactory ?? $nodeFactory = new SafeNodeFactory)
-                ->createNodeFromValue($data, $doc, 0);
+            $doc->rootNode = self::$nodeFactory->createNodeFromValue($data, $doc, 0);
 
             return $doc;
         } catch (DecodeErrorException $e) {
             throw new ParseFailureException("Decoding JSON string failed: {$e->getMessage()}", $e);
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -113,7 +118,6 @@ final class Document implements \JsonSerializable, Taggable
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -128,7 +132,6 @@ final class Document implements \JsonSerializable, Taggable
             return $doc;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd

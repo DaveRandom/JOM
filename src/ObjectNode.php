@@ -23,7 +23,6 @@ final class ObjectNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -71,7 +70,6 @@ final class ObjectNode extends VectorNode
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd

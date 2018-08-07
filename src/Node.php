@@ -5,6 +5,8 @@ namespace DaveRandom\Jom;
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 
+\DaveRandom\Jom\initialize(Node::class);
+
 abstract class Node implements \JsonSerializable, Taggable
 {
     use TagData;
@@ -12,6 +14,10 @@ abstract class Node implements \JsonSerializable, Taggable
     public const IGNORE_INVALID_VALUES = 0b01;
     public const PERMIT_INCORRECT_REFERENCE_TYPE = 0b10;
 
+    /** @var NodeFactory */
+    private static $nodeFactory;
+
+    /** @var Document|null */
     protected $ownerDocument;
 
     /** @var string|int|null */
@@ -26,6 +32,12 @@ abstract class Node implements \JsonSerializable, Taggable
     /** @var Node|null */
     protected $nextSibling;
 
+    /** @uses __init() */
+    private static function __init(): void
+    {
+        self::$nodeFactory = new UnsafeNodeFactory();
+    }
+
     /**
      * @param mixed $value
      * @throws InvalidNodeValueException
@@ -36,7 +48,6 @@ abstract class Node implements \JsonSerializable, Taggable
             return $node;
         }
 
-        /** @noinspection PhpInternalEntityUsedInspection */
         throw new InvalidNodeValueException(\sprintf(
             "Value of type %s parsed as instance of %s, instance of %s expected",
             describe($value),
@@ -52,16 +63,12 @@ abstract class Node implements \JsonSerializable, Taggable
      */
     public static function createFromValue($value, ?Document $ownerDocument = null, ?int $flags = 0): Node
     {
-        static $nodeFactory;
-
         try {
-            $result = ($nodeFactory ?? $nodeFactory = new UnsafeNodeFactory)
-                ->createNodeFromValue($value, $ownerDocument, $flags ?? 0);
+            $result = self::$nodeFactory->createNodeFromValue($value, $ownerDocument, $flags ?? 0);
         } catch (InvalidNodeValueException $e) {
             throw $e;
         //@codeCoverageIgnoreStart
         } catch (\Exception $e) {
-            /** @noinspection PhpInternalEntityUsedInspection */
             throw unexpected($e);
         }
         //@codeCoverageIgnoreEnd
@@ -107,9 +114,9 @@ abstract class Node implements \JsonSerializable, Taggable
         return false;
     }
 
-    public function containsChild(/** @noinspection PhpUnusedParameterInspection */ Node $child): bool
+    public function containsChild(Node $child): bool
     {
-        return false;
+        return $child !== $child;
     }
 
     public function getFirstChild(): ?Node
