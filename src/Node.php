@@ -5,8 +5,6 @@ namespace DaveRandom\Jom;
 use DaveRandom\Jom\Exceptions\InvalidNodeValueException;
 use DaveRandom\Jom\Exceptions\InvalidReferenceNodeException;
 
-\DaveRandom\Jom\initialize(Node::class);
-
 abstract class Node implements \JsonSerializable, Taggable
 {
     use TagData;
@@ -169,3 +167,5 @@ abstract class Node implements \JsonSerializable, Taggable
     abstract public function getValue();
     abstract public function jsonSerialize();
 }
+
+\DaveRandom\Jom\initialize(Node::class);

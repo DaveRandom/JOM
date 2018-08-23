@@ -8,8 +8,6 @@ use DaveRandom\Jom\Exceptions\ParseFailureException;
 use DaveRandom\Jom\Exceptions\WriteOperationForbiddenException;
 use ExceptionalJSON\DecodeErrorException;
 
-\DaveRandom\Jom\initialize(Document::class);
-
 final class Document implements \JsonSerializable, Taggable
 {
     use TagData;
@@ -170,3 +168,5 @@ final class Document implements \JsonSerializable, Taggable
             : null;
     }
 }
+
+\DaveRandom\Jom\initialize(Document::class);

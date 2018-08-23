@@ -4,8 +4,6 @@ namespace DaveRandom\Jom;
 
 use DaveRandom\Jom\Exceptions\InvalidPointerException;
 
-\DaveRandom\Jom\initialize(Pointer::class);
-
 final class Pointer
 {
     /** @var Pointer */
@@ -284,3 +282,5 @@ final class Pointer
         return $this->string;
     }
 }
+
+\DaveRandom\Jom\initialize(Pointer::class);

@@ -31,7 +31,7 @@ function describe($value): string
  */
 function initialize(string $class): void
 {
-    \Closure::bind(function($target) {
+    (\Closure::bind(function($target) {
         $target();
-    }, null, $class)([$class, '__init']);
+    }, null, $class))([$class, '__init']);
 }
