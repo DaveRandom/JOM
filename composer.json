@@ -10,7 +10,8 @@
     }
   ],
   "autoload": {
-    "psr-4": { "DaveRandom\\Jom\\": "src/" }
+    "psr-4": { "DaveRandom\\Jom\\": "src/" },
+    "files": [ "src/functions.php" ]
   },
   "require": {
     "php": ">=7.2",
